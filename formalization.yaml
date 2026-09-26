@@ -67,7 +67,7 @@ sources:
     location: "URL"
     relationship: "formalizes"
     note: "The author of the paper and the person formalizing is the same person."
-    license: "TEMPLATE: source license or unknown"
+    license: "unknown"
     author_endorsement: "endorsed"
 
 
@@ -90,7 +90,7 @@ automation:
       tool_setup: "AI-assisted"
       cost:
         wall_time: "free tier / N/A"
-        spend_usd: "free tier / not tracked"
+        spend_usd: "free tier"
         hardware: "local machine"
       prompting_notes: "We provided the completed PDF of the paper and asked for a line-by-line formalization."
   spend_usd: "0"

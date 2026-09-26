@@ -1,4 +1,9 @@
 /-
+Copyright (c) 2026 Kunal Relia. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Kunal Relia
+-/
+/-
   Formal Lean 4 / Mathlib Verification of Lemma 4
   "Every vertex of a cubic bridgeless graph is listed as an endpoint
    in the corresponding represents table."
@@ -37,7 +42,7 @@
 -/
 
 import VCCBGPartII.definition_vcover
-
+/-! setting linters. -/
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 set_option linter.unusedSectionVars false

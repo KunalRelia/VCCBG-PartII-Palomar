@@ -1,5 +1,5 @@
 import Mathlib
-
+/-! we define vertex cover. -/
 /-- `VCover G S`: every edge of G has at least one endpoint in S.
     Only common thread between proof of Np-completeness and polynomial time. -/
 def VCover (G : SimpleGraph V) (S : Finset V) : Prop :=
