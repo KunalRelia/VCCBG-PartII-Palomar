@@ -1,6 +1,6 @@
 {
-  "challenge_module": "Challenge",
-  "solution_module": "Solution",
+  "challenge_module": "challenge",
+  "solution_module": "solution",
   "theorem_names": ["VCCBGPartII.Lemma4_wrapper"],
   "definition_names": [],
   "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
