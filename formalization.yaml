@@ -1,0 +1,115 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+# formalization.yaml v0.4. Replace every TEMPLATE value before submitting.
+# Replace a placeholder list with [] only when its adjacent comment permits it;
+# lists described as required must remain nonempty.
+version: "v0.4"
+
+project:
+  name: "Test Formalization of Lemma 4 of VCCBG paper"
+  description: >-
+    This is a test check for formalization of one part of the VCCBG paper.
+  # Required nonempty list of name strings or mappings with a nonempty name.
+  authors:
+    - Kunal Relia
+  # Required root licence. Keep this in sync with the Apache-2.0 LICENSE file.
+  license: "Apache-2.0"
+  # Required nonempty list of name strings or mappings with a nonempty name.
+  # For a thin wrapper, name people responsible for this submitted wrapper;
+  # submission authorization separately covers the underlying formalization.
+  responsible_maintainers:
+    - Kunal Relia
+# Omit repository for an ordinary project: Palomar treats this submitted
+# repository as the substantive proof development. If this repository is only
+# a thin Comparator wrapper, uncomment and pin the actual formalization in this
+# exact shape:
+# repository:
+#   substantive_formalization:
+#     id: "TEMPLATE: owner/repository or https://github.com/owner/repository"
+#     revision: "TEMPLATE: full 40-character lowercase commit SHA"
+
+classification:
+  # Use 1–2 official arXiv identifiers such as math.LO and 1–8 five-character
+  # MSC 2020 identifiers such as 03B35.
+  arxiv: [cs.CC, cs.DS, math.CO]
+  msc2020: ["68Q15", "68P05", "68W40", "05C70"]
+
+sources:
+  # Sources must be nonempty. Every source needs a title and relationship; the
+  # relationship must be exactly formalizes, adapts, independently-proves,
+  # background, or other.
+  # Choose one result origin:
+  # - For a theorem first presented by this formalization, set one source to
+  #   type: original-proof and relationship: other. All additional source
+  #   relationships must be background or other.
+  # - Otherwise, omit type: original-proof and give at least one source a
+  #   formalizes, adapts, or independently-proves relationship. A new proof of
+  #   a known published result is source-based and uses independently-proves.
+  # Type, authors, contributors, id, location, note, license, and
+  # author_endorsement are optional; remove them when genuinely inapplicable.
+  # Authors are bibliographic authors. Contributors record other source roles,
+  # with one name and free-form role such as editor or problem-proposer.
+  # Type is a concise free-text
+  # description such as article, paper, book, formalization, web post, folklore,
+  # conversation, or other. The exact value original-proof is reserved for the
+  # result-origin declaration described above.
+  # Original-result example:
+  # - title: "TEMPLATE: describe the result first presented here"
+  #   type: original-proof
+  #   relationship: other
+  - title: "Test Formalization of Lemma 4 of VCCBG paper"
+    authors:
+      - Kunal Relia
+    contributors:
+      - name: Kunal Relia
+        role: "author"
+    id: "https://kunalrelia.github.io/img/VCCBG.pdf"
+    type: "article"
+    location: "URL"
+    relationship: "same person"
+    note: "The author of the papere and the person formalizing is the same person."
+    license: "TEMPLATE: source license or unknown"
+    author_endorsement: "endorsed"
+
+
+status:
+  scope: >-
+    Lemma 4 of the paper is formalized.
+  # Count the proof development, excluding Challenge.lean's deliberate sorry.
+  # Replace each count with an unquoted nonnegative integer, for example 0.
+  sorry_count: 0
+  sorry_in_definitions: "TEMPLATE: unquoted nonnegative integer"
+  axioms: []
+  # status.main_results is optional. Add it only when a short curated
+  # project-level list is useful; it need not mirror Comparator declarations.
+
+automation:
+  methods:
+    - method: "manual + agent"
+      models: ["Claude Sonnet 4.6 or 5"]
+      framework: "TEMPLATE: framework name, or n/a"
+      tool_setup: "AI-assisted"
+      cost:
+        wall_time: "free tier / N/A"
+        spend_usd: "free tier / not tracked"
+        hardware: "local machine"
+      prompting_notes: "We provided the completed PDF of the paper and asked for a line-by-line formalization."
+  spend_usd: "0"
+  notes: "Code generated and iterated by AI using human-generated results from a paper."
+
+
+review:
+  status: "self-assessed"
+  reviewers:
+    - "none"
+  notes: "n/a"
+
+alignment:
+  namespace: ""
+  statements:
+    - source: "Paper at https://kunalrelia.github.io/img/VCCBG.pdf."
+      lean: "VCCBGPartII.lemma4"
+      module: "challenge.lean (statement), solution.lean (proof)"
+      status: "proved"
+      note: ""
+
+acknowledgements: "blank for now"
