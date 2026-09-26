@@ -65,8 +65,8 @@ sources:
     id: "https://kunalrelia.github.io/img/VCCBG.pdf"
     type: "article"
     location: "URL"
-    relationship: "same person"
-    note: "The author of the papere and the person formalizing is the same person."
+    relationship: "formalizes"
+    note: "The author of the paper and the person formalizing is the same person."
     license: "TEMPLATE: source license or unknown"
     author_endorsement: "endorsed"
 
