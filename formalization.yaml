@@ -77,7 +77,7 @@ status:
   # Count the proof development, excluding Challenge.lean's deliberate sorry.
   # Replace each count with an unquoted nonnegative integer, for example 0.
   sorry_count: 0
-  sorry_in_definitions: "TEMPLATE: unquoted nonnegative integer"
+  sorry_in_definitions: 0
   axioms: []
   # status.main_results is optional. Add it only when a short curated
   # project-level list is useful; it need not mirror Comparator declarations.
