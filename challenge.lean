@@ -4,6 +4,7 @@ set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 set_option linter.unusedSectionVars false
 set_option linter.unusedVariables false
+set_option linter.defProp false
 /-!
 # Advertised statement — Lemma 6
 
@@ -229,15 +230,19 @@ noncomputable def matchingSubgraph (M : V → V) (hMadj : ∀ v, G.Adj v (M v)) 
     · exact Or.inr h
     · exact Or.inl h
 
-/-- `matchingSubgraph` is a perfect matching whenever `M` is a total
+/- `matchingSubgraph` is a perfect matching whenever `M` is a total
     involutive partner function without fixed points. -/
-theorem matchingIsPerfectMatching
+def matchingIsPerfectMatching
     (M : V → V) (hMinv : ∀ v, M (M v) = v) (hMadj : ∀ v, G.Adj v (M v)) :
-    (matchingSubgraph (G := G) M hMadj).IsPerfectMatching := by
-  refine ⟨fun v _ => ⟨M v, Or.inl rfl, ?_⟩, fun v => Set.mem_univ v⟩
-  rintro w (h | h)
-  · exact h.symm
-  · have := hMinv w; rw [h] at this; exact this.symm
+    (matchingSubgraph (G := G) M hMadj).IsPerfectMatching :=
+  ⟨fun v _ => ⟨M v, Or.inl rfl, by
+      rintro w (h | h)
+      · exact h.symm
+      · have := hMinv w
+        rw [h] at this
+        exact this.symm⟩,
+    fun v => Set.mem_univ v⟩
+
 
 /-- Packages the row list built by `populateRepresentsTable` together with a
     perfect matching into a genuine `RepTable G` value. -/
