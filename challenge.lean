@@ -91,7 +91,7 @@ structure DiminishingHop (R : RepTable G) (st : TableState G)
 
 /-- **Theorem 7** (Diminishing Hop and Vertex Cover, general case) —
     the result being submitted. -/
-theorem Theorem7_wrapper
+theorem VCCBGPartII.Theorem7_wrapper
     (hcubic : ∀ v : V, G.degree v = 3)
     (hbridgeless : ∀ ⦃e : Sym2 V⦄, e ∈ G.edgeSet → ¬ G.IsBridge e)
     (R : RepTable G) (st : TableState G)
