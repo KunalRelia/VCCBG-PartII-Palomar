@@ -1,1 +1,1 @@
-import VCCBGPartII.thm7
+import VCCBGPartII.thm8_lemma6

@@ -3,33 +3,62 @@ import VCCBGPartII
 set_option linter.unusedDecidableInType false
 
 /-!
-# Proved solution — Theorem 7
+# Proved solution — Lemma 6
 
-`challenge.lean` imports only `Mathlib`, so it states Theorem 7 with a
-self-contained, inlined copy of the definitions it needs (`VCover`,
-`RepTable`, `Status`, `TableState`, `RemoveInvariant`, `AllFrozenOrRemoved`,
-`FrozenSet`, `IsValidFreezeRemove`, `MinVCover`, `IsDuad`, `DuadicHop`,
-`DiminishingHop`) and leaves the proof as `sorry`.
-
-This file instead imports the full project library `VCCBGPartII`, which already
-proves the `Theorem7` over exactly the same-shaped `RepTable` / `TableState` /
-`IsValidFreezeRemove` / `FrozenSet` / `MinVCover` / `IsDuad` /
-`DiminishingHop` machinery. `Theorem7_wrapper` below is discharged in one
-step by directly invoking that `Theorem7`.
+Unlike `challenge.lean` (which re-derives every definition from
+  Mathlib alone so that `Lemma6_wrapper`'s statement type-checks with no
+  outside help), this file imports the real, already-proved development
+  and discharges the identical statement by directly invoking the real
+  `Lemma6` (`thm8_lemma6.lean`) with the supplied arguments — no
+  reconstruction needed, since every definition named in the statement
+  (`YesInstance`, `RTable`, `RepTable`, `RT0Of`, `algInit`, `SseqOf`,
+  `DiminishingHop`, etc.) here *is* the genuine one the real `Lemma6` was
+  proved about.
 -/
 
-/-- Goal accomplished: `Theorem7_wrapper` is literally `Theorem7`. -/
-theorem VCCBGPartII.Theorem7_wrapper
-    {V : Type*} [DecidableEq V] [Fintype V]
-    {G : SimpleGraph V} [DecidableRel G.Adj]
+open Finset
+
+variable {V : Type*} [DecidableEq V] [Fintype V] [Inhabited V]
+variable {G : SimpleGraph V} [DecidableRel G.Adj]
+
+/-- Goal accomplished: `Lemma6_wrapper` is literally `Lemma6`. -/
+theorem VCCBGPartII.Lemma6_wrapper
     (hcubic : ∀ v : V, G.degree v = 3)
     (hbridgeless : ∀ ⦃e : Sym2 V⦄, e ∈ G.edgeSet → ¬ G.IsBridge e)
-    (R : RepTable G) (st : TableState G)
-    (hvalid : IsValidFreezeRemove st)
-    (hsize_lb : Fintype.card V / 2 ≤ (FrozenSet st).card)
-    (hbase_case :
-      (FrozenSet st).card = Fintype.card V / 2 → MinVCover G (FrozenSet st))
-    (hduad_exists :
-      Fintype.card V / 2 < (FrozenSet st).card → ∃ u v : V, IsDuad R st u v) :
-    MinVCover G (FrozenSet st) ↔ ¬ ∃ _ : DiminishingHop R st, True :=
-  Theorem7 hcubic hbridgeless R st hvalid hsize_lb hbase_case hduad_exists
+    (adj0 : V → List V) (Vs : List V) (M : V → V) (lt : V → V → Bool) (k : ℕ)
+    (hyes : vertexCover (G := G) adj0 Vs M lt k = true)
+    (hMinv : ∀ v, M (M v) = v) (hMadj : ∀ v, G.Adj v (M v))
+    (hrow_pair : ∀ ⦃u v : V⦄, (matchingSubgraph (G := G) M hMadj).Adj u v →
+        (RT0Of (G := G) adj0 Vs M).rows.findIdx (fun rc => rc.1 = u ∨ rc.2 = u) =
+        (RT0Of (G := G) adj0 Vs M).rows.findIdx (fun rc => rc.1 = v ∨ rc.2 = v))
+    (htwo : TwoPerRow ((RT0Of (G := G) adj0 Vs M).toRepTable M hMinv hMadj hrow_pair))
+    (hedges : RowsAreEdges ((RT0Of (G := G) adj0 Vs M).toRepTable M hMinv hMadj hrow_pair))
+    (hrows_half :
+      (RowsOf ((RT0Of (G := G) adj0 Vs M).toRepTable M hMinv hMadj hrow_pair)).card
+        = Fintype.card V / 2)
+    (hV_pos : 0 < Fintype.card V)
+    (hRowsCoverAll : ∀ w : V,
+      ∃ rc ∈ ({ RT0Of (G := G) adj0 Vs M with score := fun _ => negInf } : RTable G).rows.reverse,
+        w = rc.1 ∨ w = rc.2)
+    (hRemoveInv0 : RemoveInvariant
+      (algInit ((Fintype.card V) ^ 2) (RT0Of (G := G) adj0 Vs M)).1.toTableState)
+    (hFS0 : FrozenSet (algInit ((Fintype.card V) ^ 2) (RT0Of (G := G) adj0 Vs M)).1.toTableState
+        = (algInit ((Fintype.card V) ^ 2) (RT0Of (G := G) adj0 Vs M)).2)
+    (hNoAdjAll : ∀ (Rx : RTable G) (Sx lamx : Finset V) (w : V),
+      NoAdjacentDoubleRemoval ((Fintype.card V) ^ 2) Rx Sx lamx w)
+    (hphase_eq : PhaseMatchesAlgState ((Fintype.card V) ^ 2) (RT0Of (G := G) adj0 Vs M)
+      ((RT0Of (G := G) adj0 Vs M).toRepTable M hMinv hMadj hrow_pair))
+    (hSseq_step : ∀ n,
+      (∃ _ : DiminishingHop ((RT0Of (G := G) adj0 Vs M).toRepTable M hMinv hMadj hrow_pair)
+              (SseqOf ((Fintype.card V) ^ 2) (RT0Of (G := G) adj0 Vs M) n), True) →
+        (FrozenSet (SseqOf ((Fintype.card V) ^ 2) (RT0Of (G := G) adj0 Vs M) (n + 1))).card
+          < (FrozenSet (SseqOf ((Fintype.card V) ^ 2) (RT0Of (G := G) adj0 Vs M) n)).card)
+    (hstationary : ∀ n,
+      ¬ (∃ _ : DiminishingHop ((RT0Of (G := G) adj0 Vs M).toRepTable M hMinv hMadj hrow_pair)
+              (SseqOf ((Fintype.card V) ^ 2) (RT0Of (G := G) adj0 Vs M) n), True) →
+        SseqOf ((Fintype.card V) ^ 2) (RT0Of (G := G) adj0 Vs M) (n + 1)
+          = SseqOf ((Fintype.card V) ^ 2) (RT0Of (G := G) adj0 Vs M) n) :
+    YesInstance G k :=
+  Lemma6 hcubic hbridgeless adj0 Vs M lt k hyes hMinv hMadj hrow_pair htwo hedges
+    hrows_half hV_pos hRowsCoverAll hRemoveInv0 hFS0 hNoAdjAll hphase_eq hSseq_step
+    hstationary
