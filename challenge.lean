@@ -2,31 +2,35 @@ import Mathlib
 
 set_option linter.unusedDecidableInType false
 /-!
-# Advertised statement — Lemma 4
+# Advertised statement — Theorem 4
 
-"Every vertex of a cubic bridgeless graph is listed as an endpoint in the
-corresponding represents table." (paper, p.30, lines 1018-1019.)
+"Freezing/removing the endpoints of a Represents Table corresponds
+exactly to a vertex cover of the graph." (paper, p.36, lines 1200-1222.)
 
-This is the Mathlib-only restatement of Lemma 4: the full development in
-`lemma4.lean` builds a custom `RepTable` structure whose `IsEndpoint`
-predicate is *defined* to be membership in the underlying perfect
-matching's vertex set (`v ∈ R.M.verts`). So the headline claim reduces,
-without any loss, to a statement about an arbitrary perfect matching `M`
-of `G`: every vertex of `G` lies in `M.verts`.
+This is the Mathlib-only restatement of Theorem 4. The full development
+(`reptable_ops_properties.lean` + `thm4.lean`) states Theorem 4 as an iff
+between "some `TableState` whose frozen set is exactly `S'` satisfies the
+process's structural invariants (`IsValidFreezeRemove`)" and "`S'` is a
+vertex cover of `G`".
+
+"The frozen set of a valid state equals `S'`" collapses to "`S'` itself is
+such a witness", and `RemoveInvariant` restricted to that witness reads:
+every vertex outside `S'` ("removed") has every neighbour inside `S'` ("frozen").
+So the headline claim reduces, without any loss, to a statement about an arbitrary finset
+`S' : Finset V`: "every vertex outside `S'` has all its neighbours inside
+`S'`" iff "`S'` is a vertex cover of `G`"
 
 `hcubic` and `hbridgeless` are carried along for signature fidelity with
-the rest of the development and to document the intended class of graphs;
-`M`/`hM` stand in for "the represents table's underlying perfect
-matching, as guaranteed to exist by Theorem 3 / Petersen's theorem".
+the rest of the development (they are likewise unused in the real `Theorem4`'s own proof).
 -/
 
-/-- Replace this toy statement and docstring with the result being
-submitted. -/
-theorem VCCBGPartII.Lemma4_wrapper
+/-- The result being submitted. -/
+theorem VCCBGPartII.Theorem4_wrapper
     {V : Type*} [DecidableEq V] [Fintype V]
     {G : SimpleGraph V} [DecidableRel G.Adj]
     (hcubic : ∀ v : V, G.degree v = 3)
     (hbridgeless : ∀ ⦃e : Sym2 V⦄, e ∈ G.edgeSet → ¬ G.IsBridge e)
-    {M : G.Subgraph} (hM : M.IsPerfectMatching) :
-    ∀ v : V, v ∈ M.verts := by
+    (S' : Finset V) :
+    (∃ F : Finset V, (∀ ⦃u v : V⦄, u ∉ F → G.Adj u v → v ∈ F) ∧ F = S')
+      ↔ (∀ ⦃u v : V⦄, G.Adj u v → u ∈ S' ∨ v ∈ S') := by
   sorry

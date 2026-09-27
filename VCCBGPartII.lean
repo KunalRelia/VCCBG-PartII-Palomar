@@ -1,1 +1,1 @@
-import VCCBGPartII.lemma4
+import VCCBGPartII.thm4
