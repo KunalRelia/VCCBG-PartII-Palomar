@@ -1,13 +1,5 @@
 # VCCBG_PartII
 
-## GitHub configuration
+## Formalization of Lemma 6 of the VCCBG paper
 
-To set up your new GitHub repository, follow these steps:
-
-* Under your repository name, click **Settings**.
-* In the **Actions** section of the sidebar, click "General".
-* Check the box **Allow GitHub Actions to create and approve pull requests**.
-* Click the **Pages** section of the settings sidebar.
-* In the **Source** dropdown menu, select "GitHub Actions".
-
-After following the steps above, you can remove this section from the README file.
+This is a test check of formalization of one part of the the paper on the complexity of the vertex cover problem on cubic bridgeless graphs (VCCBG). Specifically, Part II of the VCCBG paper presents an unconditional deterministic polynomial-time algorithm for VCCBG. The formalization here is of one direction of the proof of correctness of the algorihtm. It proves that ``If Algorithm 1 returns Yes, then the given instance of VC − CBG is a Yes instance.'' (Lemma 6). The formalization strictly follows the paper's structure adjacent and first formalizes a novel data structure (represents table) and novel concepts (diminishing hop analogous to augmenting paths used for maximum matching), a novel graph-theory result (bridging diminishing hops and minimum vertex cover analogous to the Berge Theorem), and discovers an algorithm that uses diminishing hops to find a minimum vertex cover (analogous to Blossom Algorithm using augmenting path to find maximum matching due to Berge Theorem).
