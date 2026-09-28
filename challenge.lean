@@ -1,6 +1,6 @@
 module
 
-import Mathlib
+public import Mathlib
 
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
@@ -36,7 +36,7 @@ variable {G : SimpleGraph V} [DecidableRel G.Adj]
 -- ═══════════════════════════════════════════════════════════════════════════
 
 /-- `VCover G S`: every edge of G has at least one endpoint in S. -/
-def VCover (G : SimpleGraph V) (S : Finset V) : Prop :=
+public def VCover (G : SimpleGraph V) (S : Finset V) : Prop :=
   ∀ ⦃u v : V⦄, G.Adj u v → u ∈ S ∨ v ∈ S
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -45,7 +45,7 @@ def VCover (G : SimpleGraph V) (S : Finset V) : Prop :=
 
 /-- `RepTable G`: a represents table for `G`, built by the augmented
     2-approximation algorithm from a perfect matching `M` and a BFS tree. -/
-structure RepTable (G : SimpleGraph V) where
+public structure RepTable (G : SimpleGraph V) where
   M : G.Subgraph
   isPM : M.IsPerfectMatching
   row : V → ℕ
@@ -57,28 +57,28 @@ structure RepTable (G : SimpleGraph V) where
 
 open Classical in
 /-- **Definition 13** (Represents List). -/
-noncomputable def RepList (G : SimpleGraph V) (u : V) : Finset V :=
+public noncomputable def RepList (G : SimpleGraph V) (u : V) : Finset V :=
   Finset.univ.filter (fun v => G.Adj u v)
 
 /-- Status of an endpoint in the represents table. -/
-inductive Status
+public inductive Status
   | unset
   | frozen
   | removed
   deriving DecidableEq
 
 /-- The live state of a represents table during execution. -/
-structure TableState (G : SimpleGraph V) where
+public structure TableState (G : SimpleGraph V) where
   status : V → Status
   reps   : V → Finset V
 
 /-- **insert**: populate the table's initial state. -/
-noncomputable def initialState (G : SimpleGraph V) : TableState G where
+public noncomputable def initialState (G : SimpleGraph V) : TableState G where
   status := fun _ => Status.unset
   reps   := fun u => RepList G u
 
 /-- **freeze**. -/
-def TableState.freeze (st : TableState G) (u : V) : TableState G where
+public def TableState.freeze (st : TableState G) (u : V) : TableState G where
   status := fun v => if v = u then Status.frozen else st.status v
   reps   := fun v => (st.reps v).erase u
 
@@ -88,19 +88,19 @@ def TableState.freeze (st : TableState G) (u : V) : TableState G where
 
 /-- The invariant maintained throughout the freeze/remove process: whenever an
     endpoint `u` is removed, every endpoint `v` adjacent to it is frozen. -/
-def RemoveInvariant (st : TableState G) : Prop :=
+public def RemoveInvariant (st : TableState G) : Prop :=
   ∀ ⦃u v : V⦄, st.status u = Status.removed → G.Adj u v → st.status v = Status.frozen
 
 /-- Every endpoint of the represents table is either frozen or removed. -/
-def AllFrozenOrRemoved (st : TableState G) : Prop :=
+public def AllFrozenOrRemoved (st : TableState G) : Prop :=
   ∀ v : V, st.status v = Status.frozen ∨ st.status v = Status.removed
 
 /-- The set S'' of frozen endpoints recorded by a table state. -/
-def FrozenSet (st : TableState G) : Finset V :=
+public def FrozenSet (st : TableState G) : Finset V :=
   Finset.univ.filter (fun v => st.status v = Status.frozen)
 
 /-- A `TableState` is a *valid freeze/remove outcome*. -/
-def IsValidFreezeRemove (st : TableState G) : Prop :=
+public def IsValidFreezeRemove (st : TableState G) : Prop :=
   RemoveInvariant st ∧ AllFrozenOrRemoved st
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -109,11 +109,11 @@ def IsValidFreezeRemove (st : TableState G) : Prop :=
 
 /-- `IsDuad R st u v`: `u` and `v` are two distinct endpoints sharing a row of
     the represents table `R`, both currently frozen in state `st`. -/
-def IsDuad (R : RepTable G) (st : TableState G) (u v : V) : Prop :=
+public def IsDuad (R : RepTable G) (st : TableState G) (u v : V) : Prop :=
   u ≠ v ∧ R.row u = R.row v ∧ st.status u = Status.frozen ∧ st.status v = Status.frozen
 
 /-- **Definition 19** (Duadic Hop). -/
-structure DuadicHop (R : RepTable G) (st : TableState G) where
+public structure DuadicHop (R : RepTable G) (st : TableState G) where
   u : V
   v : V
   duad : IsDuad R st u v
@@ -121,7 +121,7 @@ structure DuadicHop (R : RepTable G) (st : TableState G) where
   valid' : IsValidFreezeRemove st'
 
 /-- **Definition 20** (Diminishing Hop). -/
-structure DiminishingHop (R : RepTable G) (st : TableState G)
+public structure DiminishingHop (R : RepTable G) (st : TableState G)
     extends DuadicHop R st where
   smaller : (FrozenSet st').card < (FrozenSet st).card
 
@@ -132,28 +132,28 @@ structure DiminishingHop (R : RepTable G) (st : TableState G)
 noncomputable section
 
 /-- A row of the represents table: the two endpoints of one matching edge. -/
-abbrev Row (V : Type*) := V × V
+public abbrev Row (V : Type*) := V × V
 
 /-- The represents table threaded through Algorithms 2-8. -/
-structure RTable (G : SimpleGraph V) extends TableState G where
+public structure RTable (G : SimpleGraph V) extends TableState G where
   rows : List (Row V)
   score : V → Int
 
 /-- The `-∞` sentinel of Algorithm 3, Line 3. -/
-def negInf : Int := -1000000000
+public def negInf : Int := -1000000000
 
 /-- Algorithm 2, Lines 1-2's starting point. -/
-noncomputable def RTable.empty (G : SimpleGraph V) [DecidableRel G.Adj] : RTable G where
+public noncomputable def RTable.empty (G : SimpleGraph V) [DecidableRel G.Adj] : RTable G where
   toTableState := initialState G
   rows  := []
   score := fun _ => negInf
 
 /-- Pointwise function update. -/
-def upd {α : Type*} (f : V → α) (v : V) (a : α) : V → α :=
+public def upd {α : Type*} (f : V → α) (v : V) (a : α) : V → α :=
   fun w => if w = v then a else f w
 
 /-- Line 1: BFS levels. -/
-partial def bfsLevels (adj : V → List V) (start : V) : List (List V) :=
+public partial def bfsLevels (adj : V → List V) (start : V) : List (List V) :=
   let rec go (frontier visited : List V) : List (List V) :=
     match frontier with
     | [] => []
@@ -166,7 +166,7 @@ partial def bfsLevels (adj : V → List V) (start : V) : List (List V) :=
 
 /-- Lines 6-9: find an `M`-edge from `u` to a vertex on the same level, else
     to a vertex on the next level. -/
-def selectMEdge (adj : V → List V) (inM : V → V → Bool)
+public def selectMEdge (adj : V → List V) (inM : V → V → Bool)
     (u : V) (sameLevel nextLevel : List V) : Option V :=
   match (adj u).find? (fun w => inM u w && sameLevel.contains w) with
   | some w => some w
@@ -174,11 +174,11 @@ def selectMEdge (adj : V → List V) (inM : V → V → Bool)
 
 /-- Line 13: delete every edge incident to `x` from the (BFS-only) adjacency
     function. -/
-def removeIncidentEdges (adj : V → List V) (x : V) : V → List V :=
+public def removeIncidentEdges (adj : V → List V) (x : V) : V → List V :=
   fun w => if w = x then [] else (adj w).filter (· ≠ x)
 
 /-- Lines 3-16, the double loop. -/
-partial def populateLoop
+public partial def populateLoop
     (inM : V → V → Bool)
     (levels : List (List V)) (adj : V → List V) (visited : List V) (R : RTable G) :
     RTable G :=
@@ -208,7 +208,7 @@ partial def populateLoop
     populateLoop inM rest adj visited R
 
 /-- **Algorithm 2** (`POPULATE_REPRESENTS_TABLE(G, M, V_S)`). -/
-def populateRepresentsTable
+public def populateRepresentsTable
     (adj0 : V → List V) (inM : V → V → Bool) (Vs : List V) : RTable G :=
   match Vs with
   | []      => RTable.empty G
@@ -217,7 +217,7 @@ def populateRepresentsTable
     populateLoop inM T adj0 [] (RTable.empty G)
 
 /-- `M`, given as its total partner function, as a `G.Subgraph`. -/
-noncomputable def matchingSubgraph (M : V → V) (hMadj : ∀ v, G.Adj v (M v)) :
+public noncomputable def matchingSubgraph (M : V → V) (hMadj : ∀ v, G.Adj v (M v)) :
     G.Subgraph where
   verts := Set.univ
   Adj   := fun u v => M u = v ∨ M v = u
@@ -234,7 +234,7 @@ noncomputable def matchingSubgraph (M : V → V) (hMadj : ∀ v, G.Adj v (M v)) 
 
 /- `matchingSubgraph` is a perfect matching whenever `M` is a total
     involutive partner function without fixed points. -/
-def matchingIsPerfectMatching
+public def matchingIsPerfectMatching
     (M : V → V) (hMinv : ∀ v, M (M v) = v) (hMadj : ∀ v, G.Adj v (M v)) :
     (matchingSubgraph (G := G) M hMadj).IsPerfectMatching :=
   ⟨fun v _ => ⟨M v, Or.inl rfl, by
@@ -248,7 +248,7 @@ def matchingIsPerfectMatching
 
 /-- Packages the row list built by `populateRepresentsTable` together with a
     perfect matching into a genuine `RepTable G` value. -/
-def RTable.toRepTable (R : RTable G) (M : V → V)
+public def RTable.toRepTable (R : RTable G) (M : V → V)
     (hMinv : ∀ v, M (M v) = v) (hMadj : ∀ v, G.Adj v (M v))
     (hrow_pair : ∀ ⦃u v : V⦄, (matchingSubgraph (G := G) M hMadj).Adj u v →
       R.rows.findIdx (fun rc => rc.1 = u ∨ rc.2 = u) =
@@ -260,7 +260,7 @@ def RTable.toRepTable (R : RTable G) (M : V → V)
   row_pair := hrow_pair
 
 /-- **Algorithm 4** (`COMPUTE_REPRESENTATION_SCORE`), the opaque original. -/
-partial def computeRepresentationScore (R0 : RTable G) : RTable G :=
+public partial def computeRepresentationScore (R0 : RTable G) : RTable G :=
   let rec loop (processed : List (Row V)) (remaining : List (Row V)) (R : RTable G) :
       RTable G :=
     match remaining with
@@ -289,7 +289,7 @@ partial def computeRepresentationScore (R0 : RTable G) : RTable G :=
   loop [] R0.rows R0
 
 /-- **Algorithm 6** (`FREEZE_AND_REMOVE`), the opaque original. -/
-partial def freezeAndRemove (R : RTable G) (S : Finset V)
+public partial def freezeAndRemove (R : RTable G) (S : Finset V)
     (psi omega : Option V) : RTable G × Finset V :=
   let (R, S) :=
     match psi with
@@ -321,7 +321,7 @@ partial def freezeAndRemove (R : RTable G) (S : Finset V)
     (R, S)
 
 /-- **Algorithm 5** (`VERTEX_ELIMINATION`), the opaque original. -/
-partial def vertexElimination (R0 : RTable G) (S0 : Finset V) :
+public partial def vertexElimination (R0 : RTable G) (S0 : Finset V) :
     RTable G × Finset V :=
   let rec loop (rows : List (Row V)) (R : RTable G) (S : Finset V) :
       RTable G × Finset V :=
@@ -347,7 +347,7 @@ partial def vertexElimination (R0 : RTable G) (S0 : Finset V) :
   loop R0.rows.reverse R0 S0
 
 /-- **Algorithm 8** (`DUADIC_HOP`), the opaque original. -/
-partial def duadicHop (R : RTable G) (S : Finset V)
+public partial def duadicHop (R : RTable G) (S : Finset V)
     (psi omega : Option V) (lam : Finset V) : RTable G × Finset V × Finset V :=
   let (R, S, lam) :=
     match omega with
@@ -391,7 +391,7 @@ partial def duadicHop (R : RTable G) (S : Finset V)
         (R, S, lam)
 
 /-- **Algorithm 7** (`DIMINISHING_HOPS`), the opaque original. -/
-partial def diminishingHops (R0 : RTable G) (S0 : Finset V) : RTable G × Finset V :=
+public partial def diminishingHops (R0 : RTable G) (S0 : Finset V) : RTable G × Finset V :=
   let rec go (rows : List (Row V)) (Rd : RTable G) (Sd : Finset V) (lamd : Finset V) :
       RTable G × Finset V :=
     match rows with
@@ -410,7 +410,7 @@ partial def diminishingHops (R0 : RTable G) (S0 : Finset V) : RTable G × Finset
   go R0.rows R0 S0 (∅ : Finset V)
 
 /-- **Algorithm 3** (`DIMINISHING_HOP_PHASE`), the opaque original. -/
-partial def diminishingHopPhase (R0 : RTable G) : Finset V :=
+public partial def diminishingHopPhase (R0 : RTable G) : Finset V :=
   let S0 : Finset V := ∅
   let R1 : RTable G := { R0 with score := fun _ => negInf }
   let R2 := computeRepresentationScore R1
@@ -424,7 +424,7 @@ partial def diminishingHopPhase (R0 : RTable G) : Finset V :=
   Sfinal
 
 /-- **Algorithm 1** (`VERTEX_COVER(G, k)`), the top-level decision procedure. -/
-def vertexCover
+public def vertexCover
     (adj0 : V → List V) (Vs : List V) (M : V → V) (lt : V → V → Bool)
     (k : ℕ) : Bool :=
   let matchingEdges : List (Row V) :=
@@ -444,21 +444,21 @@ end
 -- ═══════════════════════════════════════════════════════════════════════════
 
 /-- Freeze a single endpoint `u`. -/
-def freezeOne (R : RTable G) (S : Finset V) (u : V) : RTable G × Finset V :=
+public def freezeOne (R : RTable G) (S : Finset V) (u : V) : RTable G × Finset V :=
   ({ R with status := upd R.status u Status.frozen }, insert u S)
 
 /-- The endpoints Algorithm 8's removal step considers when removing `ω`. -/
-def removalPartners (R : RTable G) (ω : V) : Finset V :=
+public def removalPartners (R : RTable G) (ω : V) : Finset V :=
   Finset.univ.filter (fun u => u ∈ R.reps ω ∨ ω ∈ R.reps u)
 
 /-- Given the row `(a, b)` found for endpoint `u`, the *other* endpoint of
     that row. -/
-def partnerOf (row : Row V) (u : V) : V :=
+public def partnerOf (row : Row V) (u : V) : V :=
   if row.1 = u then row.2 else row.1
 
 /-- **Structural core of Algorithm 8** (`dh`), fuel-indexed so it is
     ordinary structural recursion. -/
-noncomputable def dh : Nat → RTable G → Finset V → Finset V → (V ⊕ List V) →
+public noncomputable def dh : Nat → RTable G → Finset V → Finset V → (V ⊕ List V) →
     RTable G × Finset V × Finset V
   | 0,     R, S, lam, _ => (R, S, lam)
   | n + 1, R, S, lam, Sum.inl ω =>
@@ -488,7 +488,7 @@ noncomputable def dh : Nat → RTable G → Finset V → Finset V → (V ⊕ Lis
 
 /-- No two graph-adjacent endpoints are ever both left `removed` at the end
     of a single call to `dh (Sum.inl ω)`. -/
-def NoAdjacentDoubleRemoval (n : ℕ) (R : RTable G) (S lam : Finset V) (ω : V) : Prop :=
+public def NoAdjacentDoubleRemoval (n : ℕ) (R : RTable G) (S lam : Finset V) (ω : V) : Prop :=
   ∀ v w, G.Adj v w →
     (dh n R S lam (Sum.inl ω)).1.status v = Status.removed →
     (dh n R S lam (Sum.inl ω)).1.status w ≠ Status.removed
@@ -498,15 +498,15 @@ def NoAdjacentDoubleRemoval (n : ℕ) (R : RTable G) (S lam : Finset V) (ω : V)
 -- ═══════════════════════════════════════════════════════════════════════════
 
 /-- The set of row indices actually used by `R`. -/
-def RowsOf (R : RepTable G) : Finset ℕ := Finset.image R.row Finset.univ
+public def RowsOf (R : RepTable G) : Finset ℕ := Finset.image R.row Finset.univ
 
 /-- **Definition 14, "two endpoints per row."** -/
-def TwoPerRow (R : RepTable G) : Prop :=
+public def TwoPerRow (R : RepTable G) : Prop :=
   ∀ i ∈ RowsOf R, ∃ u v : V,
     u ≠ v ∧ R.row u = i ∧ R.row v = i ∧ ∀ w, R.row w = i → w = u ∨ w = v
 
 /-- **Definition 14, "a row is a matching edge."** -/
-def RowsAreEdges (R : RepTable G) : Prop :=
+public def RowsAreEdges (R : RepTable G) : Prop :=
   ∀ (i : ℕ) (u v : V), u ≠ v → R.row u = i → R.row v = i → G.Adj u v
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -514,25 +514,26 @@ def RowsAreEdges (R : RepTable G) : Prop :=
 -- ═══════════════════════════════════════════════════════════════════════════
 
 /-- **VC − CBG, "Yes instance."** -/
-def YesInstance (G : SimpleGraph V) (k : ℕ) : Prop :=
+public def YesInstance (G : SimpleGraph V) (k : ℕ) : Prop :=
   ∃ S : Finset V, VCover G S ∧ S.card ≤ k
 
 /-- Exactly `vertexCover`'s own local `let inM := ...`. -/
-def inMOf (M : V → V) : V → V → Bool := fun a b => decide (M a = b ∨ M b = a)
+public def inMOf (M : V → V) : V → V → Bool := fun a b => decide (M a = b ∨ M b = a)
 
 /-- Exactly `vertexCover`'s own local `let R := populateRepresentsTable
     adj0 inM Vs`. -/
-noncomputable def RT0Of (adj0 : V → List V) (Vs : List V) (M : V → V) : RTable G :=
+public noncomputable def RT0Of (adj0 : V → List V) (Vs : List V) (M : V → V) : RTable G :=
   populateRepresentsTable (G := G) adj0 (inMOf M) Vs
 
 /-- One "try hopping by removing endpoint `w`" step. -/
-noncomputable def dhopsStep (fuel : ℕ) (Roriginal : RTable G) (Soriginal lamOriginal : Finset V)
+public noncomputable def dhopsStep
+  (fuel : ℕ) (Roriginal : RTable G) (Soriginal lamOriginal : Finset V)
     (cur : RTable G × Finset V × Finset V) (w : V) : RTable G × Finset V × Finset V :=
   let (R1, S1, l1) := dh fuel Roriginal Soriginal lamOriginal (Sum.inl w)
   if S1.card < (cur.2).1.card then (R1, S1, l1) else cur
 
 /-- **Algorithm 7** (`DIMINISHING_HOPS`), re-derived. -/
-noncomputable def dhops (fuel : ℕ) : List (Row V) → RTable G → Finset V → Finset V →
+public noncomputable def dhops (fuel : ℕ) : List (Row V) → RTable G → Finset V → Finset V →
     RTable G × Finset V
   | [], Rd, Sd, _ => (Rd, Sd)
   | rc :: rest, Rd, Sd, lamd =>
@@ -544,18 +545,19 @@ noncomputable def dhops (fuel : ℕ) : List (Row V) → RTable G → Finset V �
       dhops fuel rest Rd Sd lamd
 
 /-- **Algorithm 7's own entry point**, matching `diminishingHops R0 S0`. -/
-noncomputable def diminishingHops' (fuel : ℕ) (R0 : RTable G) (S0 : Finset V) :
+public noncomputable def diminishingHops' (fuel : ℕ) (R0 : RTable G) (S0 : Finset V) :
   RTable G × Finset V :=
   dhops fuel R0.rows R0 S0 (∅ : Finset V)
 
 /-- The "Freeze Operation" half of Algorithm 6, re-derived. -/
-noncomputable def frFreeze (R : RTable G) (S : Finset V) (ψ : V) : RTable G × Finset V :=
+public noncomputable def frFreeze (R : RTable G) (S : Finset V) (ψ : V) : RTable G × Finset V :=
   let ts := R.toTableState.freeze ψ
   let ts := { ts with reps := upd ts.reps ψ (∅ : Finset V) }
   (({ R with toTableState := ts } : RTable G), insert ψ S)
 
 mutual
-noncomputable def frRemove (n : ℕ) (R : RTable G) (S : Finset V) (ω : V) : RTable G × Finset V :=
+public noncomputable def frRemove
+  (n : ℕ) (R : RTable G) (S : Finset V) (ω : V) : RTable G × Finset V :=
   let R := { R with status := upd R.status ω Status.removed }
   let S := S.erase ω
   let candidates1 :=
@@ -568,7 +570,7 @@ noncomputable def frRemove (n : ℕ) (R : RTable G) (S : Finset V) (ω : V) : RT
   let R := { R with reps := upd R.reps ω (∅ : Finset V) }
   (R, S)
 
-noncomputable def fr : ℕ → RTable G → Finset V → Option V → Option V → RTable G × Finset V
+public noncomputable def fr : ℕ → RTable G → Finset V → Option V → Option V → RTable G × Finset V
   | 0, R, S, _, _ => (R, S)
   | n + 1, R, S, psi, omega =>
     let (R, S) := match psi with
@@ -580,7 +582,7 @@ noncomputable def fr : ℕ → RTable G → Finset V → Option V → Option V �
 end
 
 /-- One endpoint's score update, re-derived as its own `def`. -/
-def crsStep (processed : List (Row V)) (R : RTable G) (w : V) : RTable G :=
+public def crsStep (processed : List (Row V)) (R : RTable G) (w : V) : RTable G :=
   match R.status w with
   | Status.unset =>
     let contribution := processed.foldl (fun acc xy =>
@@ -591,7 +593,7 @@ def crsStep (processed : List (Row V)) (R : RTable G) (w : V) : RTable G :=
   | _ => { R with score := upd R.score w (-1) }
 
 /-- **Algorithm 4**, re-derived: ordinary structural recursion. -/
-def crs : List (Row V) → List (Row V) → RTable G → RTable G
+public def crs : List (Row V) → List (Row V) → RTable G → RTable G
   | _, [], R => R
   | processed, rc :: rest, R =>
     let R := crsStep processed R rc.1
@@ -603,7 +605,7 @@ def crs : List (Row V) → List (Row V) → RTable G → RTable G
 def computeRepresentationScore' (R0 : RTable G) : RTable G := crs [] R0.rows R0
 
 /-- **Algorithm 5** (`VERTEX_ELIMINATION`), re-derived. -/
-noncomputable def ve' (fuel : ℕ) : List (Row V) → RTable G → Finset V → RTable G × Finset V
+public noncomputable def ve' (fuel : ℕ) : List (Row V) → RTable G → Finset V → RTable G × Finset V
   | [], R, S => (R, S)
   | (u, v) :: rest, R, S =>
     let R := computeRepresentationScore' R
@@ -623,28 +625,28 @@ noncomputable def ve' (fuel : ℕ) : List (Row V) → RTable G → Finset V → 
     ve' fuel rest R S
 
 /-- **Algorithm 5's own entry point** (bottom-up: `R0.rows.reverse`). -/
-noncomputable def vertexElimination' (fuel : ℕ) (R0 : RTable G) (S0 : Finset V) :
+public noncomputable def vertexElimination' (fuel : ℕ) (R0 : RTable G) (S0 : Finset V) :
   RTable G × Finset V :=
   ve' fuel R0.rows.reverse R0 S0
 
 /-- **Algorithm 3, Lines 1-5**, re-derived from the *transparent*
     re-derivations above. -/
-noncomputable def algInit (fuel : ℕ) (R0 : RTable G) : RTable G × Finset V :=
+public noncomputable def algInit (fuel : ℕ) (R0 : RTable G) : RTable G × Finset V :=
   vertexElimination' fuel
     (computeRepresentationScore' ({ R0 with score := fun _ => negInf } : RTable G))
     (∅ : Finset V)
 
 /-- **Algorithm 3, Lines 6-8's loop, re-executed literally**. -/
-noncomputable def algState (fuel : ℕ) (R0 : RTable G) : ℕ → RTable G × Finset V
+public noncomputable def algState (fuel : ℕ) (R0 : RTable G) : ℕ → RTable G × Finset V
   | 0     => algInit fuel R0
   | n + 1 => diminishingHops' fuel (algState fuel R0 n).1 (algState fuel R0 n).2
 
 /-- The table-state component of `algState`. -/
-noncomputable def SseqOf (fuel : ℕ) (R0 : RTable G) (n : ℕ) : TableState G :=
+public noncomputable def SseqOf (fuel : ℕ) (R0 : RTable G) (n : ℕ) : TableState G :=
   (algState fuel R0 n).1.toTableState
 
 /-- Bridges the opaque original `diminishingHopPhase` to `algState`. -/
-def PhaseMatchesAlgState (fuel : ℕ) (R0 : RTable G) (R : RepTable G) : Prop :=
+public def PhaseMatchesAlgState (fuel : ℕ) (R0 : RTable G) (R : RepTable G) : Prop :=
   diminishingHopPhase R0 = (algState fuel R0 (RowsOf R).card).2
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -652,7 +654,7 @@ def PhaseMatchesAlgState (fuel : ℕ) (R0 : RTable G) (R : RepTable G) : Prop :=
 -- ═══════════════════════════════════════════════════════════════════════════
 
 /-- **Lemma 6** (paper, p.58, lines 1776-1920), the result being submitted. -/
-theorem VCCBGPartII.Lemma6_wrapper
+public theorem VCCBGPartII.Lemma6_wrapper
     (hcubic : ∀ v : V, G.degree v = 3)
     (hbridgeless : ∀ ⦃e : Sym2 V⦄, e ∈ G.edgeSet → ¬ G.IsBridge e)
     (adj0 : V → List V) (Vs : List V) (M : V → V) (lt : V → V → Bool) (k : ℕ)

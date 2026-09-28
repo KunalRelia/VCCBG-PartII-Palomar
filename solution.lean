@@ -24,7 +24,7 @@ variable {V : Type*} [DecidableEq V] [Fintype V] [Inhabited V]
 variable {G : SimpleGraph V} [DecidableRel G.Adj]
 
 /-- Goal accomplished: `Lemma6_wrapper` is literally `Lemma6`. -/
-theorem VCCBGPartII.Lemma6_wrapper
+public theorem VCCBGPartII.Lemma6_wrapper
     (hcubic : ∀ v : V, G.degree v = 3)
     (hbridgeless : ∀ ⦃e : Sym2 V⦄, e ∈ G.edgeSet → ¬ G.IsBridge e)
     (adj0 : V → List V) (Vs : List V) (M : V → V) (lt : V → V → Bool) (k : ℕ)
