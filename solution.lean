@@ -1,4 +1,6 @@
-import VCCBGPartII
+module
+
+public import VCCBGPartII
 
 set_option linter.unusedDecidableInType false
 

@@ -3,6 +3,7 @@ Copyright (c) 2026 Kunal Relia. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Kunal Relia
 -/
+module
 /-
   Formal Lean 4 / Mathlib Verification of Lemma 6
   "If the Algorithm 1 returns Yes, then the given instance of VC − CBG is
@@ -117,13 +118,14 @@ Authors: Kunal Relia
 
 -/
 
-import VCCBGPartII.thm8_lemma6_lemma8
+public import VCCBGPartII.thm8_lemma6_lemma8
 
 /-! setting linters. -/
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 set_option linter.unusedSectionVars false
 set_option linter.unusedVariables false
+set_option linter.style.longLine false
 
 open Finset
 
@@ -141,7 +143,7 @@ variable {G : SimpleGraph V} [DecidableRel G.Adj]
 /-- **VC − CBG, "Yes instance."** `G` together with a bound `k` is a Yes
     instance of the vertex-cover decision problem iff `G` has a vertex
     cover of size at most `k`. -/
-def YesInstance (G : SimpleGraph V) (k : ℕ) : Prop :=
+public abbrev YesInstance (G : SimpleGraph V) (k : ℕ) : Prop :=
   ∃ S : Finset V, VCover G S ∧ S.card ≤ k
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -153,12 +155,12 @@ def YesInstance (G : SimpleGraph V) (k : ℕ) : Prop :=
     graph. Named here, as a plain (reducible) top-level `def`, purely so
     every later statement can refer to it without repeating the lambda
     and without the `let`-in-type friction v2 ran into. -/
-def inMOf (M : V → V) : V → V → Bool := fun a b => decide (M a = b ∨ M b = a)
+public abbrev inMOf (M : V → V) : V → V → Bool := fun a b => decide (M a = b ∨ M b = a)
 
 /-- Exactly `vertexCover`'s own local `let R := populateRepresentsTable
     adj0 inM Vs` (Algorithm 1, Line 8): Algorithm 2's actual output on
     the data `vertexCover` itself would call it with. -/
-noncomputable def RT0Of (adj0 : V → List V) (Vs : List V) (M : V → V) : RTable G :=
+public noncomputable abbrev RT0Of (adj0 : V → List V) (Vs : List V) (M : V → V) : RTable G :=
   populateRepresentsTable (G := G) adj0 (inMOf M) Vs
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -168,7 +170,7 @@ noncomputable def RT0Of (adj0 : V → List V) (Vs : List V) (M : V → V) : RTab
 /-- **Free consequence 1**: Line 5 did not return No. Proved by
     `simp only [vertexCover]` (delta *and* zeta reduction, exposing the
     raw `if`) followed by an explicit `by_cases`/`ite_eq_left`/`ite_eq_right`. -/
-theorem vertexCover_true_matchingEdges_le
+public theorem vertexCover_true_matchingEdges_le
     (adj0 : V → List V) (Vs : List V) (M : V → V) (lt : V → V → Bool) (k : ℕ)
     (hyes : vertexCover (G := G) adj0 Vs M lt k = true) :
     (Vs.filterMap (fun u => if lt u (M u) then some (u, M u) else none)).length ≤ k := by
@@ -187,7 +189,7 @@ theorem vertexCover_true_matchingEdges_le
     discharges it by defeq (both sides unfold, via `inMOf`/`RT0Of`, to
     the identical subterm `simp only [vertexCover]` exposes inside
     `hyes`). -/
-theorem vertexCover_true_card_le
+public theorem vertexCover_true_card_le
     (adj0 : V → List V) (Vs : List V) (M : V → V) (lt : V → V → Bool) (k : ℕ)
     (hyes : vertexCover (G := G) adj0 Vs M lt k = true) :
     (diminishingHopPhase (RT0Of (G := G) adj0 Vs M)).card ≤ k := by
@@ -216,13 +218,13 @@ theorem vertexCover_true_card_le
     the top of this row, before either endpoint has been tried), keeping
     the result only if it strictly shrinks the cover relative to `cur`,
     the best found so far this row. -/
-noncomputable def dhopsStep (fuel : ℕ) (Roriginal : RTable G) (Soriginal lamOriginal : Finset V)
+public noncomputable abbrev dhopsStep (fuel : ℕ) (Roriginal : RTable G) (Soriginal lamOriginal : Finset V)
     (cur : RTable G × Finset V × Finset V) (w : V) : RTable G × Finset V × Finset V :=
   let (R1, S1, l1) := dh fuel Roriginal Soriginal lamOriginal (Sum.inl w)
   if S1.card < (cur.2).1.card then (R1, S1, l1) else cur
 
 /-- **Algorithm 7** (`DIMINISHING_HOPS`), re-derived. -/
-noncomputable def dhops (fuel : ℕ) : List (Row V) → RTable G → Finset V → Finset V →
+public noncomputable abbrev dhops (fuel : ℕ) : List (Row V) → RTable G → Finset V → Finset V →
     RTable G × Finset V
   | [], Rd, Sd, _ => (Rd, Sd)
   | rc :: rest, Rd, Sd, lamd =>
@@ -235,14 +237,14 @@ noncomputable def dhops (fuel : ℕ) : List (Row V) → RTable G → Finset V �
 
 /-- **Algorithm 7's own entry point**, matching `diminishingHops R0 S0`:
     start the row scan from `R0.rows`, with an empty visited set `λ`. -/
-noncomputable def diminishingHops' (fuel : ℕ) (R0 : RTable G) (S0 : Finset V) :
+public noncomputable abbrev diminishingHops' (fuel : ℕ) (R0 : RTable G) (S0 : Finset V) :
   RTable G × Finset V :=
   dhops fuel R0.rows R0 S0 (∅ : Finset V)
 
 /-- One `dhopsStep` call preserves `AllFrozenOrRemoved`/cover-tracking,
     whichever branch fires: the `dh`-branch by `dh_status_frozen`
     (already proved); the "keep `cur` unchanged" branch trivially. -/
-theorem dhopsStep_preserves
+public theorem dhopsStep_preserves
     (fuel : ℕ) (Roriginal : RTable G) (Soriginal lamOriginal : Finset V)
     (cur : RTable G × Finset V × Finset V) (w : V)
     (hAllO : AllFrozenOrRemoved Roriginal.toTableState)
@@ -271,7 +273,7 @@ theorem dhopsStep_preserves
     at a duad row (`Rd`, `Sd`, fixed at the top of the row) is exactly
     what the outer induction hypothesis already establishes satisfies the
     invariant, so `dhopsStep_preserves` applies directly. -/
-theorem dhops_preserves (fuel : ℕ) :
+public theorem dhops_preserves (fuel : ℕ) :
     ∀ (rows : List (Row V)) (Rd : RTable G) (Sd lamd : Finset V),
       AllFrozenOrRemoved Rd.toTableState → FrozenSet Rd.toTableState = Sd →
       AllFrozenOrRemoved (dhops fuel rows Rd Sd lamd).1.toTableState ∧
@@ -292,7 +294,7 @@ theorem dhops_preserves (fuel : ℕ) :
     · exact ih Rd Sd lamd hAll hFS
 
 /-- Restated at `diminishingHops'`'s own entry point. -/
-theorem diminishingHops'_preserves
+public theorem diminishingHops'_preserves
     (fuel : ℕ) (R0 : RTable G) (S0 : Finset V)
     (hAll : AllFrozenOrRemoved R0.toTableState) (hFS : FrozenSet R0.toTableState = S0) :
     AllFrozenOrRemoved (diminishingHops' fuel R0 S0).1.toTableState ∧
@@ -311,7 +313,7 @@ theorem diminishingHops'_preserves
     isolates): the `dh`-branch inherits `RemoveInvariant` from
     `dh_removeInvariant`; the "keep `cur` unchanged" branch inherits it
     from `cur` directly. -/
-theorem dhopsStep_removeInvariant
+public theorem dhopsStep_removeInvariant
     (fuel : ℕ) (Roriginal : RTable G) (Soriginal lamOriginal : Finset V)
     (cur : RTable G × Finset V × Finset V) (w : V)
     (hAllO : AllFrozenOrRemoved Roriginal.toTableState)
@@ -336,7 +338,7 @@ theorem dhopsStep_removeInvariant
     the natural sufficient hypothesis is the blanket form: `dh`'s
     no-double-removal guarantee holds no matter which table/cover/visited
     triple it is started from. -/
-theorem dhops_removeInvariant (fuel : ℕ)
+public theorem dhops_removeInvariant (fuel : ℕ)
     (hNoAdjAll : ∀ (Rx : RTable G) (Sx lamx : Finset V) (w : V),
       NoAdjacentDoubleRemoval fuel Rx Sx lamx w) :
     ∀ (rows : List (Row V)) (Rd : RTable G) (Sd lamd : Finset V),
@@ -377,7 +379,7 @@ theorem dhops_removeInvariant (fuel : ℕ)
     `hRemoveInv : ∀ n, RemoveInvariant (SseqOf ... n)` be proved by
     induction from just round 0, exactly mirroring how `hvalid`'s
     `AllFrozenOrRemoved` half already is. -/
-theorem diminishingHops'_valid (fuel : ℕ)
+public theorem diminishingHops'_valid (fuel : ℕ)
     (hNoAdjAll : ∀ (Rx : RTable G) (Sx lamx : Finset V) (w : V),
       NoAdjacentDoubleRemoval fuel Rx Sx lamx w)
     (R0 : RTable G) (S0 : Finset V)
@@ -405,7 +407,7 @@ theorem diminishingHops'_valid (fuel : ℕ)
     case of `freezeAndRemove`, pulled out as its own named function so it
     can be reasoned about via its own equation lemma rather than an
     unfolded `let`-chain inside a bigger match. -/
-noncomputable def frFreeze (R : RTable G) (S : Finset V) (ψ : V) : RTable G × Finset V :=
+public noncomputable def frFreeze (R : RTable G) (S : Finset V) (ψ : V) : RTable G × Finset V :=
   let ts := R.toTableState.freeze ψ
   let ts := { ts with reps := upd ts.reps ψ (∅ : Finset V) }
   (({ R with toTableState := ts } : RTable G), insert ψ S)
@@ -422,7 +424,7 @@ noncomputable def frFreeze (R : RTable G) (S : Finset V) (ψ : V) : RTable G × 
 -- per recursive step, matching `dh`'s own discipline
 -- (`thm8_lemma6_lemma7.lean §3`).
 mutual
-noncomputable def frRemove (n : ℕ) (R : RTable G) (S : Finset V) (ω : V) : RTable G × Finset V :=
+public noncomputable def frRemove (n : ℕ) (R : RTable G) (S : Finset V) (ω : V) : RTable G × Finset V :=
   let R := { R with status := upd R.status ω Status.removed }
   let S := S.erase ω
   let candidates1 :=
@@ -435,7 +437,7 @@ noncomputable def frRemove (n : ℕ) (R : RTable G) (S : Finset V) (ω : V) : RT
   let R := { R with reps := upd R.reps ω (∅ : Finset V) }
   (R, S)
 
-noncomputable def fr : ℕ → RTable G → Finset V → Option V → Option V → RTable G × Finset V
+public noncomputable def fr : ℕ → RTable G → Finset V → Option V → Option V → RTable G × Finset V
   | 0, R, S, _, _ => (R, S)
   | n + 1, R, S, psi, omega =>
     let (R, S) := match psi with
@@ -450,7 +452,7 @@ end
     a two-part invariant on an `RTable G × Finset V` accumulator, the
     whole fold does, by ordinary induction on the list. Used for both of
     `frRemove`'s cascades. -/
-theorem foldl_preserves {α : Type*} (l : List α)
+public theorem foldl_preserves {α : Type*} (l : List α)
     (step : RTable G × Finset V → α → RTable G × Finset V)
     (hstep : ∀ (RS : RTable G × Finset V) (a : α),
       AllFrozenOrRemoved RS.1.toTableState → FrozenSet RS.1.toTableState = RS.2 →
@@ -476,7 +478,7 @@ theorem foldl_preserves {α : Type*} (l : List α)
     `AllFrozenOrRemoved`/`FrozenSet` never inspect, so the `.status`
     formula — `fun v => if v = ψ then frozen else R.status v` — and hence
     this proof, are identical in substance. -/
-theorem frFreeze_preserves (R : RTable G) (S : Finset V) (ψ : V)
+public theorem frFreeze_preserves (R : RTable G) (S : Finset V) (ψ : V)
     (hAll : AllFrozenOrRemoved R.toTableState) (hFS : FrozenSet R.toTableState = S) :
     AllFrozenOrRemoved (frFreeze R S ψ).1.toTableState ∧
     FrozenSet (frFreeze R S ψ).1.toTableState = (frFreeze R S ψ).2 := by
@@ -523,7 +525,7 @@ theorem frFreeze_preserves (R : RTable G) (S : Finset V) (ψ : V)
     fuel). The direct removal step (before either cascade) is the same
     `remove_step` argument `dh_status_frozen`'s own proof already
     validates; the two cascades then follow from `foldl_preserves`. -/
-theorem frRemove_preserves (n : ℕ)
+public theorem frRemove_preserves (n : ℕ)
     (ih : ∀ (R : RTable G) (S : Finset V) (psi omega : Option V),
       AllFrozenOrRemoved R.toTableState → FrozenSet R.toTableState = S →
       AllFrozenOrRemoved (fr n R S psi omega).1.toTableState ∧
@@ -605,7 +607,7 @@ theorem frRemove_preserves (n : ℕ)
     exactly `n` (from the matched `n + 1`), so a single `induction n`
     suffices — genuine structural induction on `fr`'s own definition,
     mirroring `dh_status_frozen` exactly. -/
-theorem fr_preserves :
+public theorem fr_preserves :
     ∀ (n : ℕ) (R : RTable G) (S : Finset V) (psi omega : Option V),
       AllFrozenOrRemoved R.toTableState → FrozenSet R.toTableState = S →
       AllFrozenOrRemoved (fr n R S psi omega).1.toTableState ∧
@@ -648,7 +650,7 @@ theorem fr_preserves :
     table's rows interact with `G`'s adjacency, not a termination or
     bookkeeping fact, and not derived here, in the same spirit as
     `NoAdjacentDoubleRemoval` itself. -/
-def NoAdjacentDoubleRemovalFr
+public abbrev NoAdjacentDoubleRemovalFr
     (n : ℕ) (R : RTable G) (S : Finset V) (psi omega : Option V) : Prop :=
   ∀ v w, G.Adj v w →
     (fr n R S psi omega).1.status v = Status.removed →
@@ -659,7 +661,7 @@ def NoAdjacentDoubleRemovalFr
     and adjacent, forces the other endpoint frozen" needs
     `AllFrozenOrRemoved` to rule out the other endpoint being merely
     `unset`) and `NoAdjacentDoubleRemovalFr` for this specific call. -/
-theorem fr_removeInvariant
+public theorem fr_removeInvariant
     (n : ℕ) (R : RTable G) (S : Finset V) (psi omega : Option V)
     (hAll : AllFrozenOrRemoved R.toTableState) (hFS : FrozenSet R.toTableState = S)
     (hNoAdj : NoAdjacentDoubleRemovalFr n R S psi omega) :
@@ -678,7 +680,7 @@ theorem fr_removeInvariant
     `PARTII_algorithms.lean`'s inline `scoreEndpoint`, pulled
     out as its own `def`. Every branch is `{ R with score := upd ... }` —
     `.status`/`.reps`/`.rows` are never touched. -/
-def crsStep (processed : List (Row V)) (R : RTable G) (w : V) : RTable G :=
+public abbrev crsStep (processed : List (Row V)) (R : RTable G) (w : V) : RTable G :=
   match R.status w with
   | Status.unset =>
     let contribution := processed.foldl (fun acc xy =>
@@ -692,7 +694,7 @@ def crsStep (processed : List (Row V)) (R : RTable G) (w : V) : RTable G :=
     (second) row-list argument, decreasing at every recursive call —
     Lean accepts this automatically, unlike the original `partial def
     computeRepresentationScore`. -/
-def crs : List (Row V) → List (Row V) → RTable G → RTable G
+public abbrev crs : List (Row V) → List (Row V) → RTable G → RTable G
   | _, [], R => R
   | processed, rc :: rest, R =>
     let R := crsStep processed R rc.1
@@ -701,10 +703,10 @@ def crs : List (Row V) → List (Row V) → RTable G → RTable G
 
 /-- **Algorithm 4's own entry point**, matching
     `computeRepresentationScore R0` exactly. -/
-def computeRepresentationScore' (R0 : RTable G) : RTable G := crs [] R0.rows R0
+public abbrev computeRepresentationScore' (R0 : RTable G) : RTable G := crs [] R0.rows R0
 
 /-- `crsStep` never touches `.status` or `.reps`. -/
-theorem crsStep_status_reps (processed : List (Row V)) (R : RTable G) (w : V) :
+public theorem crsStep_status_reps (processed : List (Row V)) (R : RTable G) (w : V) :
     (crsStep processed R w).status = R.status ∧ (crsStep processed R w).reps = R.reps := by
   unfold crsStep
   split <;> exact ⟨rfl, rfl⟩
@@ -712,7 +714,7 @@ theorem crsStep_status_reps (processed : List (Row V)) (R : RTable G) (w : V) :
 /-- **`crs` never touches `.status` or `.reps`**, by induction on the row
     list — the simplest of the four re-derivations, since Algorithm 4's
     entire job is to write into `.score` alone. -/
-theorem crs_status_reps :
+public theorem crs_status_reps :
     ∀ (processed remaining : List (Row V)) (R : RTable G),
       (crs processed remaining R).status = R.status ∧
       (crs processed remaining R).reps = R.reps := by
@@ -726,7 +728,7 @@ theorem crs_status_reps :
     obtain ⟨h3s, h3r⟩ := ih (processed ++ [rc]) (crsStep processed (crsStep processed R rc.1) rc.2)
     exact ⟨h3s.trans (h2s.trans h1s), h3r.trans (h2r.trans h1r)⟩
 
-theorem computeRepresentationScore'_status_reps (R0 : RTable G) :
+public theorem computeRepresentationScore'_status_reps (R0 : RTable G) :
     (computeRepresentationScore' R0).status = R0.status ∧
     (computeRepresentationScore' R0).reps = R0.reps :=
   crs_status_reps [] R0.rows R0
@@ -745,7 +747,7 @@ theorem computeRepresentationScore'_status_reps (R0 : RTable G) :
     own treatment of `dh`'s fuel in §4). Both mirror-image sub-cases of
     "one endpoint remains, the other is frozen" are handled, exactly as
     the original. -/
-noncomputable def ve' (fuel : ℕ) : List (Row V) → RTable G → Finset V → RTable G × Finset V
+public noncomputable abbrev ve' (fuel : ℕ) : List (Row V) → RTable G → Finset V → RTable G × Finset V
   | [], R, S => (R, S)
   | (u, v) :: rest, R, S =>
     let R := computeRepresentationScore' R
@@ -766,7 +768,7 @@ noncomputable def ve' (fuel : ℕ) : List (Row V) → RTable G → Finset V → 
 
 /-- **Algorithm 5's own entry point**, matching `vertexElimination R0 S0`
     exactly (bottom-up: `R0.rows.reverse`). -/
-noncomputable def vertexElimination' (fuel : ℕ) (R0 : RTable G) (S0 : Finset V) :
+public noncomputable abbrev vertexElimination' (fuel : ℕ) (R0 : RTable G) (S0 : Finset V) :
   RTable G × Finset V :=
   ve' fuel R0.rows.reverse R0 S0
 
@@ -779,7 +781,7 @@ noncomputable def vertexElimination' (fuel : ℕ) (R0 : RTable G) (S0 : Finset V
     it shows the invariant survives if it already held before this row,
     not that it comes to hold in the first place from an all-`unset`
     start — see the closing note below and §10. -/
-theorem ve'_preserves (fuel : ℕ) :
+public theorem ve'_preserves (fuel : ℕ) :
     ∀ (rows : List (Row V)) (R : RTable G) (S : Finset V),
       AllFrozenOrRemoved R.toTableState → FrozenSet R.toTableState = S →
       AllFrozenOrRemoved (ve' fuel rows R S).1.toTableState ∧
@@ -832,7 +834,7 @@ theorem ve'_preserves (fuel : ℕ) :
 /-- Given the graph is connected and bridgeless, it is implied that
     every vertex is reachable, which is equivalent to saying that
     each ebdpoint in represents table is reachable. -/
-def VertexEliminationAchievesCoverage (fuel : ℕ) (R0 : RTable G) : Prop :=
+public abbrev VertexEliminationAchievesCoverage (fuel : ℕ) (R0 : RTable G) : Prop :=
   AllFrozenOrRemoved (vertexElimination' fuel R0 ∅).1.toTableState
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -849,7 +851,7 @@ def VertexEliminationAchievesCoverage (fuel : ℕ) (R0 : RTable G) : Prop :=
     re-derivations of Algorithms 4-6 that make `algInit` transparent
     follow in §4a-§4i.) `hphase_eq` (§5) is what bridges this transparent
     sequence back to the *real*, opaque `diminishingHopPhase`. -/
-noncomputable def algInit (fuel : ℕ) (R0 : RTable G) : RTable G × Finset V :=
+public noncomputable abbrev algInit (fuel : ℕ) (R0 : RTable G) : RTable G × Finset V :=
   vertexElimination' fuel
     (computeRepresentationScore' ({ R0 with score := fun _ => negInf } : RTable G))
     (∅ : Finset V)
@@ -859,14 +861,14 @@ noncomputable def algInit (fuel : ℕ) (R0 : RTable G) : RTable G × Finset V :=
     subsequent round is `diminishingHops'` (§4, above) — transparent,
     structurally recursive, and provably behaved — in place of the
     opaque `diminishingHops`. -/
-noncomputable def algState (fuel : ℕ) (R0 : RTable G) : ℕ → RTable G × Finset V
+public noncomputable abbrev algState (fuel : ℕ) (R0 : RTable G) : ℕ → RTable G × Finset V
   | 0     => algInit fuel R0
   | n + 1 => diminishingHops' fuel (algState fuel R0 n).1 (algState fuel R0 n).2
 
 /-- The table-state component of `algState`, in the `TableState G`
     vocabulary `IsValidFreezeRemove`/`FrozenSet`/`DiminishingHop`
     (`thm4.lean`/`thm6.lean`) already use. -/
-noncomputable def SseqOf (fuel : ℕ) (R0 : RTable G) (n : ℕ) : TableState G :=
+public noncomputable abbrev SseqOf (fuel : ℕ) (R0 : RTable G) (n : ℕ) : TableState G :=
   (algState fuel R0 n).1.toTableState
 
 /-- **The actual reduction `Lemma6` (§8) exploits.** Given only that
@@ -879,7 +881,7 @@ noncomputable def SseqOf (fuel : ℕ) (R0 : RTable G) (n : ℕ) : TableState G :
     `AllFrozenOrRemoved` half of `∀ n, IsValidFreezeRemove (SseqOf ... n)`
     (`hvalid`) into a proved theorem too — leaving only the
     `RemoveInvariant` half of `hvalid` still to assume (§8). -/
-theorem algState_valid (fuel : ℕ) (R0 : RTable G)
+public theorem algState_valid (fuel : ℕ) (R0 : RTable G)
     (hAll0 : AllFrozenOrRemoved (algInit fuel R0).1.toTableState)
     (hFS0 : FrozenSet (algInit fuel R0).1.toTableState = (algInit fuel R0).2) :
     ∀ n, AllFrozenOrRemoved (algState fuel R0 n).1.toTableState ∧
@@ -895,7 +897,7 @@ theorem algState_valid (fuel : ℕ) (R0 : RTable G)
     fix stands): the round count is the row count directly, since the
     paper's `m` is `Fintype.card V` and `m/2` (the round count) is
     `Fintype.card V / 2` (Lemma 1) — the row count, not half of it. -/
-def numRounds (R0 : RTable G) : ℕ := R0.rows.length
+public abbrev numRounds (R0 : RTable G) : ℕ := R0.rows.length
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- §4f. Tying §4a-§4e together: `RemoveInvariant` also reduces to a
@@ -914,7 +916,7 @@ def numRounds (R0 : RTable G) : ℕ := R0.rows.length
     round 0 (`hvalid0`, now `IsValidFreezeRemove` in full) plus one
     structural hypothesis about the cascade (`hNoAdjAll`) rather than an
     opaque claim repeated at every round. -/
-theorem algState_fullyValid (fuel : ℕ) (R0 : RTable G)
+public theorem algState_fullyValid (fuel : ℕ) (R0 : RTable G)
     (hNoAdjAll : ∀ (Rx : RTable G) (Sx lamx : Finset V) (w : V),
       NoAdjacentDoubleRemoval fuel Rx Sx lamx w)
     (hvalid0 : IsValidFreezeRemove (algInit fuel R0).1.toTableState)
@@ -943,7 +945,7 @@ theorem algState_fullyValid (fuel : ℕ) (R0 : RTable G)
     instance of `fr_ne_unset_mono` as a parameter (`ih`) exactly as
     `frRemove_preserves` already does for the analogous `AllFrozenOrRemoved`
     claim. -/
-theorem frRemove_ne_unset_mono (n : ℕ)
+public theorem frRemove_ne_unset_mono (n : ℕ)
     (ih : ∀ (R : RTable G) (S : Finset V) (psi omega : Option V) (w : V),
       R.status w ≠ Status.unset → (fr n R S psi omega).1.status w ≠ Status.unset)
     (R : RTable G) (S : Finset V) (ω0 : V) (w : V)
@@ -984,7 +986,7 @@ theorem frRemove_ne_unset_mono (n : ℕ)
     `Status.unset`, so any vertex already `≠ unset` stays so. Proved by
     induction on the fuel, exactly mirroring `fr_preserves`'s own
     structure but for this simpler, single-vertex claim. -/
-theorem fr_ne_unset_mono :
+public theorem fr_ne_unset_mono :
     ∀ (n : ℕ) (R : RTable G) (S : Finset V) (psi omega : Option V) (w : V),
       R.status w ≠ Status.unset → (fr n R S psi omega).1.status w ≠ Status.unset := by
   intro n
@@ -1017,7 +1019,7 @@ theorem fr_ne_unset_mono :
     (the direct removal step, before any cascade), and monotonicity
     (above) carries this through the rest of `frRemove`'s own cascade —
     the mirror-image fact to `frFreeze`'s target always becoming frozen. -/
-theorem frRemove_removes_target (n : ℕ) (R : RTable G) (S : Finset V) (ω : V) :
+public theorem frRemove_removes_target (n : ℕ) (R : RTable G) (S : Finset V) (ω : V) :
     (frRemove n R S ω).1.status ω ≠ Status.unset := by
   have h1 : ({ R with status := upd R.status ω Status.removed } : RTable G).status ω
       ≠ Status.unset := by
@@ -1048,7 +1050,7 @@ theorem frRemove_removes_target (n : ℕ) (R : RTable G) (S : Finset V) (ω : V)
 /-- Whenever `fr` is called with `psi = some ψ`, `ψ` ends up `≠ unset`
     (`frFreeze` sets it directly; monotonicity carries this through any
     subsequent `omega`-cascade). -/
-theorem fr_freezes_target (n : ℕ) (R : RTable G) (S : Finset V) (ψ : V) (omega : Option V) :
+public theorem fr_freezes_target (n : ℕ) (R : RTable G) (S : Finset V) (ψ : V) (omega : Option V) :
     (fr (n + 1) R S (some ψ) omega).1.status ψ ≠ Status.unset := by
   have h1 : (frFreeze R S ψ).1.status ψ ≠ Status.unset := by
     change (if ψ = ψ then Status.frozen else R.status ψ) ≠ Status.unset
@@ -1062,7 +1064,7 @@ theorem fr_freezes_target (n : ℕ) (R : RTable G) (S : Finset V) (ψ : V) (omeg
 
 /-- Whenever `fr` is called with `omega = some ω`, `ω` ends up `≠ unset`
     (`frRemove_removes_target`, after whichever `psi`-freeze precedes it). -/
-theorem fr_removes_target (n : ℕ) (R : RTable G) (S : Finset V) (psi : Option V) (ω : V) :
+public theorem fr_removes_target (n : ℕ) (R : RTable G) (S : Finset V) (psi : Option V) (ω : V) :
     (fr (n + 1) R S psi (some ω)).1.status ω ≠ Status.unset := by
   cases psi with
   | none => simp only [fr]; exact frRemove_removes_target n R S ω
@@ -1078,7 +1080,7 @@ theorem fr_removes_target (n : ℕ) (R : RTable G) (S : Finset V) (psi : Option 
     `fr_removes_target`). Folded directly into the main induction below
     rather than factored out as its own lemma, since its statement would
     otherwise need to repeat `ve'`'s own `let`/`if` structure verbatim. -/
-theorem ve'_covers_endpoints (m : ℕ) :
+public theorem ve'_covers_endpoints (m : ℕ) :
     ∀ (rows : List (Row V)) (R : RTable G) (S : Finset V) (w : V),
       (R.status w ≠ Status.unset ∨ ∃ rc ∈ rows, w = rc.1 ∨ w = rc.2) →
       (ve' (m + 1) rows R S).1.status w ≠ Status.unset := by
@@ -1160,7 +1162,7 @@ theorem ve'_covers_endpoints (m : ℕ) :
     content read at the level of the concrete row *list* rather than the
     abstract `RepTable`/`TwoPerRow` machinery), Algorithm 5's output has
     **every** vertex `≠ unset` — full coverage, genuinely proved. -/
-theorem vertexElimination'_covers_all (m : ℕ) (R0 : RTable G) (S0 : Finset V)
+public theorem vertexElimination'_covers_all (m : ℕ) (R0 : RTable G) (S0 : Finset V)
     (hRowsCoverAll : ∀ w : V, ∃ rc ∈ R0.rows.reverse, w = rc.1 ∨ w = rc.2) :
     ∀ w : V, (vertexElimination' (m + 1) R0 S0).1.status w ≠ Status.unset :=
   fun w => ve'_covers_endpoints m R0.rows.reverse R0 S0 w (Or.inr (hRowsCoverAll w))
@@ -1168,7 +1170,7 @@ theorem vertexElimination'_covers_all (m : ℕ) (R0 : RTable G) (S0 : Finset V)
 /-- Hence `AllFrozenOrRemoved`, by `Status`'s own three-way case split
     (`≠ unset` leaves only `frozen`/`removed`) — no separate argument
     needed. -/
-theorem vertexElimination'_AllFrozenOrRemoved (m : ℕ) (R0 : RTable G) (S0 : Finset V)
+public theorem vertexElimination'_AllFrozenOrRemoved (m : ℕ) (R0 : RTable G) (S0 : Finset V)
     (hRowsCoverAll : ∀ w : V, ∃ rc ∈ R0.rows.reverse, w = rc.1 ∨ w = rc.2) :
     AllFrozenOrRemoved (vertexElimination' (m + 1) R0 S0).1.toTableState := by
   intro w
@@ -1200,11 +1202,11 @@ theorem vertexElimination'_AllFrozenOrRemoved (m : ℕ) (R0 : RTable G) (S0 : Fi
     what lets `hRowsCoverAll` (stated about the *input* row list) transfer
     unchanged to `computeRepresentationScore'`'s output, the table
     `vertexElimination'_AllFrozenOrRemoved` actually needs it for. -/
-theorem crsStep_rows (processed : List (Row V)) (R : RTable G) (w : V) :
+public theorem crsStep_rows (processed : List (Row V)) (R : RTable G) (w : V) :
     (crsStep processed R w).rows = R.rows := by
   unfold crsStep; split <;> rfl
 
-theorem crs_rows :
+public theorem crs_rows :
     ∀ (processed remaining : List (Row V)) (R : RTable G),
       (crs processed remaining R).rows = R.rows := by
   intro processed remaining
@@ -1215,11 +1217,11 @@ theorem crs_rows :
     simp only [crs]
     rw [ih, crsStep_rows, crsStep_rows]
 
-theorem computeRepresentationScore'_rows (R0 : RTable G) :
+public theorem computeRepresentationScore'_rows (R0 : RTable G) :
     (computeRepresentationScore' R0).rows = R0.rows :=
   crs_rows [] R0.rows R0
 
-theorem algInit_AllFrozenOrRemoved (m : ℕ) (R0 : RTable G)
+public theorem algInit_AllFrozenOrRemoved (m : ℕ) (R0 : RTable G)
     (hRowsCoverAll :
       ∀ w : V, ∃ rc ∈ ({ R0 with score := fun _ => negInf } : RTable G).rows.reverse,
         w = rc.1 ∨ w = rc.2) :
@@ -1256,7 +1258,7 @@ theorem algInit_AllFrozenOrRemoved (m : ℕ) (R0 : RTable G)
 /-- This proves that after running a step of the diminishingHopPhase with a given
 amount of fuel, the abstract state accurately matches the concrete
 algorithm state (algState), given each row has two endpoints (a structual fact). -/
-def PhaseMatchesAlgState (fuel : ℕ) (R0 : RTable G) (R : RepTable G) : Prop :=
+public abbrev PhaseMatchesAlgState (fuel : ℕ) (R0 : RTable G) (R : RepTable G) : Prop :=
   diminishingHopPhase R0 = (algState fuel R0 (RowsOf R).card).2
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -1269,7 +1271,7 @@ def PhaseMatchesAlgState (fuel : ℕ) (R0 : RTable G) (R : RepTable G) : Prop :=
     definition — via `ext` + `simp only [DuadRows, Finset.mem_filter]`,
     the same technique the (inaccessible) private lemma itself used,
     self-contained and borrowing nothing non-exported. -/
-theorem DuadRows_subset_RowsOf (R : RepTable G) (st : TableState G) :
+public theorem DuadRows_subset_RowsOf (R : RepTable G) (st : TableState G) :
     DuadRows R st ⊆ RowsOf R := by
   classical
   have heq : DuadRows R st = (RowsOf R).filter (fun i => IsDuadRow R st i) := by
@@ -1284,7 +1286,7 @@ theorem DuadRows_subset_RowsOf (R : RepTable G) (st : TableState G) :
     hypothesis is needed to bound the initial duad count by `N`, only to
     relate `(RowsOf R).card` back to `Fintype.card V / 2` for the
     `hduad_exists` derivation in §8 (`hrows_half`). -/
-theorem DuadRows_card_le_RowsOf (R : RepTable G) (st : TableState G) :
+public theorem DuadRows_card_le_RowsOf (R : RepTable G) (st : TableState G) :
     (DuadRows R st).card ≤ (RowsOf R).card :=
   Finset.card_le_card (DuadRows_subset_RowsOf R st)
 
@@ -1307,7 +1309,7 @@ theorem DuadRows_card_le_RowsOf (R : RepTable G) (st : TableState G) :
     specialized to a *perfect* matching — and it is what lets §8 below
     eliminate `hsize_lb`/`hbase_case` as hypotheses of `Lemma6` entirely,
     replacing them with two-line derivations. -/
-theorem matching_lower_bound
+public theorem matching_lower_bound
     (M : V → V) (hMinv : ∀ v, M (M v) = v) (hMadj : ∀ v, G.Adj v (M v))
     (T : Finset V) (hT : VCover G T) :
     Fintype.card V / 2 ≤ T.card := by
@@ -1328,7 +1330,7 @@ theorem matching_lower_bound
 -- §7. A sequence that has stabilized stays stabilized
 -- ═══════════════════════════════════════════════════════════════════════════
 
-theorem Sseq_eventually_constant
+public theorem Sseq_eventually_constant
     (R : RepTable G) (Sseq : ℕ → TableState G)
     (hstationary :
       ∀ n, ¬ (∃ _ : DiminishingHop R (Sseq n), True) → Sseq (n + 1) = Sseq n)
@@ -1376,7 +1378,7 @@ theorem Sseq_eventually_constant
     proven by either Petersen's theorem or Lemma 7 and 8's own correctness
     content. §4/§4a-§4i now fully resolve for Algorithms 4-8's validity/
     bookkeeping, coverage included. -/
-theorem Lemma6
+public theorem Lemma6
     (hcubic : ∀ v : V, G.degree v = 3)
     (hbridgeless : ∀ ⦃e : Sym2 V⦄, e ∈ G.edgeSet → ¬ G.IsBridge e)
     (adj0 : V → List V) (Vs : List V) (M : V → V) (lt : V → V → Bool) (k : ℕ)
@@ -1500,7 +1502,7 @@ theorem Lemma6
 -- §9. Lemma 7's role made explicit
 -- ═══════════════════════════════════════════════════════════════════════════
 
-theorem hop_found_implies_step
+public theorem hop_found_implies_step
     (R : RepTable G) (Sseq : ℕ → TableState G) (n : ℕ)
     {u v : V} (hduad : IsDuad R (Sseq n) u v)
     (Hu Hv : HopCandidate R (Sseq n) u v)

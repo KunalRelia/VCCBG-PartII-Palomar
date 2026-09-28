@@ -1,3 +1,4 @@
+module
 /-
 Copyright (c) 2026 Kunal Relia. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
@@ -41,7 +42,7 @@ Authors: Kunal Relia
     matching M found by the Blossom algorithm".
 -/
 
-import VCCBGPartII.definition_vcover
+public import VCCBGPartII.definition_vcover
 /-! setting linters. -/
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
@@ -63,7 +64,7 @@ variable {G : SimpleGraph V} [DecidableRel G.Adj]
 
 /-- `RepTable G`: a represents table for `G`, built by the augmented
     2-approximation algorithm from a perfect matching `M` and a BFS tree. -/
-structure RepTable (G : SimpleGraph V) where
+public structure RepTable (G : SimpleGraph V) where
   M : G.Subgraph
   isPM : M.IsPerfectMatching
   row : V → ℕ
@@ -74,7 +75,7 @@ namespace RepTable
 /-- A vertex `v` is *listed as an endpoint* in the represents table `R`
     iff it is an endpoint of the row corresponding to `R.M`, i.e. iff it
     lies in the vertex set of the (spanning) matching subgraph `R.M`. -/
-def IsEndpoint (R : RepTable G) (v : V) : Prop := v ∈ R.M.verts
+public abbrev IsEndpoint (R : RepTable G) (v : V) : Prop := v ∈ R.M.verts
 
 end RepTable
 
@@ -91,7 +92,7 @@ end RepTable
     as an endpoint in `R`.
 
     `hcubic` and `hbridgeless` are used for signature fidelity. -/
-theorem Lemma4
+public theorem Lemma4
     (hcubic : ∀ v : V, G.degree v = 3)
     (hbridgeless : ∀ ⦃e : Sym2 V⦄, e ∈ G.edgeSet → ¬ G.IsBridge e)
     (R : RepTable G) :
@@ -110,7 +111,7 @@ theorem Lemma4
     it is genuinely an endpoint of an edge of the matching, not merely an
     isolated element of `R.M.verts`. This is the form used when reasoning
     about represents lists (Table 2/3) themselves. -/
-theorem Lemma4_matched
+public theorem Lemma4_matched
     (hcubic : ∀ v : V, G.degree v = 3)
     (hbridgeless : ∀ ⦃e : Sym2 V⦄, e ∈ G.edgeSet → ¬ G.IsBridge e)
     (R : RepTable G) :

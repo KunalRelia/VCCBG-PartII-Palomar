@@ -1,3 +1,4 @@
+module
 /-
 Copyright (c) 2026 Kunal Relia. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
@@ -47,7 +48,7 @@ Authors: Kunal Relia
     Property 3 and Property 4 are theorems about `VCover`.
 -/
 
-import VCCBGPartII.lemma4
+public import VCCBGPartII.lemma4
 /-! setting linters. -/
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
@@ -70,7 +71,7 @@ variable {G : SimpleGraph V} [DecidableRel G.Adj]
 /-- **Definition 12** (Represents). `u` represents `v` iff they are joined
     by an edge of `G`. (Symmetric, as the paper notes: "conversely, v is
     represented by u".) -/
-def Represents (G : SimpleGraph V) (u v : V) : Prop := G.Adj u v
+public abbrev Represents (G : SimpleGraph V) (u v : V) : Prop := G.Adj u v
 
 open Classical in
 /-- **Definition 13** (Represents List). `Lu`, the set of vertices `u`
@@ -82,10 +83,10 @@ open Classical in
     since `V` is already a `Fintype`. We use `Classical` decidability for
     the filter predicate so this definition does not depend on exactly how
     `[DecidableRel G.Adj]` was synthesized as a local instance.) -/
-noncomputable def RepList (G : SimpleGraph V) (u : V) : Finset V :=
+public noncomputable def RepList (G : SimpleGraph V) (u : V) : Finset V :=
   Finset.univ.filter (fun v => G.Adj u v)
 
-lemma mem_RepList_iff_represents {u v : V} :
+public lemma mem_RepList_iff_represents {u v : V} :
     v ∈ RepList G u ↔ Represents G u v := by
   simp [RepList, Represents]
 
@@ -111,7 +112,7 @@ end RepTable
     vertices already finalized in strictly earlier rows have already been
     removed, so they no longer appear in `u`'s live represents list — only
     vertices in rows `≥ row u` can still be represented by `u`.) -/
-def TableRepresents (R : RepTable G) (u v : V) : Prop :=
+public abbrev TableRepresents (R : RepTable G) (u v : V) : Prop :=
   G.Adj u v ∧ R.row u ≤ R.row v
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -124,13 +125,13 @@ def TableRepresents (R : RepTable G) (u v : V) : Prop :=
     `i ≤ j`. Both halves are immediate from the definition of
     `TableRepresents`, which is precisely how the "directional" restriction
     is built into the recorded relation. -/
-theorem Property1 (R : RepTable G) {u v : V} (h : TableRepresents R u v) :
+public theorem Property1 (R : RepTable G) {u v : V} (h : TableRepresents R u v) :
     R.row u ≤ R.row v :=
   h.2
 
 /-- Contrapositive form, matching the paper's phrasing: `u` cannot
     represent an endpoint in a strictly earlier row. -/
-theorem Property1' (R : RepTable G) {u v : V} (hlt : R.row v < R.row u) :
+public theorem Property1' (R : RepTable G) {u v : V} (hlt : R.row v < R.row u) :
     ¬ TableRepresents R u v :=
   fun h => absurd (Property1 R h) (not_le.mpr hlt)
 
@@ -143,7 +144,7 @@ theorem Property1' (R : RepTable G) {u v : V} (hlt : R.row v < R.row u) :
     matching edge (`row_pair`), and matching edges are edges of `G`
     (`SimpleGraph.Subgraph.Adj.adj_sub`), so both directions of
     `TableRepresents` hold with the row inequality being an equality. -/
-theorem Property2 (R : RepTable G) {u v : V} (hM : R.M.Adj u v) :
+public theorem Property2 (R : RepTable G) {u v : V} (hM : R.M.Adj u v) :
     TableRepresents R u v ∧ TableRepresents R v u := by
   have hadj : G.Adj u v := hM.adj_sub
   have hrow : R.row u = R.row v := R.row_pair hM
@@ -159,7 +160,7 @@ theorem Property2 (R : RepTable G) {u v : V} (hM : R.M.Adj u v) :
     embedding), and in the cubic-bridgeless case, since `R` is built from a
     *perfect* matching, every vertex is an endpoint (Lemma 4) and hence the
     endpoint set is all of `V`, which trivially forms a vertex cover. -/
-theorem Property3 (R : RepTable G)
+public theorem Property3 (R : RepTable G)
     (hcubic : ∀ v : V, G.degree v = 3)
     (hbridgeless : ∀ ⦃e : Sym2 V⦄, e ∈ G.edgeSet → ¬ G.IsBridge e) :
     (∀ v : V, R.IsEndpoint v) ∧ VCover G (Finset.univ : Finset V) := by
@@ -177,7 +178,7 @@ theorem Property3 (R : RepTable G)
     supports **no deletion** — `status` only ever moves `unset → frozen` or
     `unset → removed`, never back; we do not need to state this separately
     since our operations below never revert a `frozen`/`removed` status. -/
-inductive Status
+public inductive Status
   | unset
   | frozen
   | removed
@@ -186,7 +187,7 @@ inductive Status
 /-- The live state of a represents table during execution: each vertex's
     current status, and its current (possibly already-shrunk) represents
     list. -/
-structure TableState (G : SimpleGraph V) where
+public structure TableState (G : SimpleGraph V) where
   status : V → Status
   reps   : V → Finset V
 
@@ -196,39 +197,39 @@ structure TableState (G : SimpleGraph V) where
     (The paper notes insert is O(1) per row and needs no access to
     previous data — reflected here in that `initialState` does not
     depend on any prior `TableState`.) -/
-noncomputable def initialState (G : SimpleGraph V) : TableState G where
+public noncomputable abbrev initialState (G : SimpleGraph V) : TableState G where
   status := fun _ => Status.unset
   reps   := fun u => RepList G u
 
 /-- **access / search**. Purely a read of the current state; no state
     change. We give the two forms the paper distinguishes: accessing the
     status of an endpoint, and accessing its represents list. -/
-def TableState.accessStatus (st : TableState G) (u : V) : Status := st.status u
+public abbrev TableState.accessStatus (st : TableState G) (u : V) : Status := st.status u
 
-def TableState.accessRepList (st : TableState G) (u : V) : Finset V := st.reps u
+public abbrev TableState.accessRepList (st : TableState G) (u : V) : Finset V := st.reps u
 
 /-- **freeze**. Freezing `u` (selecting it into the vertex cover)
     simultaneously delists `u` from every represents list it appears in.
     (The paper additionally delists `Lu` itself, which we do not need to
     track further since a frozen vertex's own list is never consulted
     again by the operations below.) -/
-def TableState.freeze (st : TableState G) (u : V) : TableState G where
+@[expose] public def TableState.freeze (st : TableState G) (u : V) : TableState G where
   status := fun v => if v = u then Status.frozen else st.status v
   reps   := fun v => (st.reps v).erase u
 
 /-- Freezing `u` marks it frozen. -/
-theorem TableState.freeze_status (st : TableState G) (u : V) :
+public theorem TableState.freeze_status (st : TableState G) (u : V) :
     (st.freeze u).status u = Status.frozen := by
   simp [TableState.freeze]
 
 /-- Freezing `u` delists `u` from every represents list (the operation's
     key structural postcondition). -/
-theorem TableState.freeze_delists (st : TableState G) (u v : V) :
+public theorem TableState.freeze_delists (st : TableState G) (u v : V) :
     u ∉ (st.freeze u).reps v := by
   simp [TableState.freeze]
 
 /-- Freezing `u` never un-freezes or un-removes any other endpoint. -/
-theorem TableState.freeze_status_of_ne (st : TableState G) {u v : V} (h : v ≠ u) :
+public theorem TableState.freeze_status_of_ne (st : TableState G) {u v : V} (h : v ≠ u) :
     (st.freeze u).status v = st.status v := by
   simp [TableState.freeze, h]
 
@@ -240,7 +241,7 @@ theorem TableState.freeze_status_of_ne (st : TableState G) {u v : V} (h : v ≠ 
     matching the paper's "each vertex in the represents list of the
     removed endpoint u and each vertex that represents the endpoint u is
     frozen" verbatim. -/
-def TableState.remove (st : TableState G) (u : V) : TableState G where
+public def TableState.remove (st : TableState G) (u : V) : TableState G where
   status := fun v =>
     if v = u then Status.removed
     else if v ∈ st.reps u ∨ u ∈ st.reps v then Status.frozen
@@ -248,13 +249,13 @@ def TableState.remove (st : TableState G) (u : V) : TableState G where
   reps := st.reps
 
 /-- Removing `u` marks it removed. -/
-theorem TableState.remove_status (st : TableState G) (u : V) :
+public theorem TableState.remove_status (st : TableState G) (u : V) :
     (st.remove u).status u = Status.removed := by
   simp [TableState.remove]
 
 /-- Removing `u` freezes every vertex it represents or that represents it
     (the operation's key structural postcondition). -/
-theorem TableState.remove_freezes (st : TableState G) {u v : V} (hv : v ≠ u)
+public theorem TableState.remove_freezes (st : TableState G) {u v : V} (hv : v ≠ u)
     (h : v ∈ st.reps u ∨ u ∈ st.reps v) :
     (st.remove u).status v = Status.frozen := by
   simp [TableState.remove, hv, h]
@@ -263,7 +264,7 @@ theorem TableState.remove_freezes (st : TableState G) {u v : V} (hv : v ≠ u)
     (three, if `G` is cubic) neighbours of `u` — matching the paper's
     remark that "each of the three vertices that are connected to the
     removed endpoint needs to be in the vertex cover". -/
-theorem remove_initialState_freezes_neighbors {u v : V} (hadj : G.Adj u v) :
+public theorem remove_initialState_freezes_neighbors {u v : V} (hadj : G.Adj u v) :
     ((initialState G).remove u).status v = Status.frozen := by
   have hv : v ≠ u := hadj.ne'
   have : v ∈ (initialState G).reps u := by
@@ -285,7 +286,7 @@ theorem remove_initialState_freezes_neighbors {u v : V} (hadj : G.Adj u v) :
     status), that a removed vertex's neighbours are always frozen; we take
     it as an explicit hypothesis here, exactly as `Theorem12` takes
     `hbridgeless` as an explicit hypothesis rather than re-deriving it. -/
-theorem Property4 (st : TableState G)
+public theorem Property4 (st : TableState G)
     (hremove_freezes_nbrs :
       ∀ ⦃u v⦄, st.status u = Status.removed → G.Adj u v → st.status v = Status.frozen)
     (hall : ∀ v : V, st.status v = Status.frozen ∨ st.status v = Status.removed) :
@@ -299,7 +300,7 @@ theorem Property4 (st : TableState G)
 /-- The single-step instance of `hremove_freezes_nbrs` used above,
     discharged for the state obtained from one `remove` applied to the
     initial state. -/
-theorem remove_initialState_satisfies_invariant (u : V) :
+public theorem remove_initialState_satisfies_invariant (u : V) :
     ∀ ⦃u' v⦄, ((initialState G).remove u).status u' = Status.removed →
       G.Adj u' v → ((initialState G).remove u).status v = Status.frozen := by
   intro u' v hrem hadj

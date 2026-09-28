@@ -1,1 +1,2 @@
-import VCCBGPartII.thm8_lemma6
+module
+public import VCCBGPartII.thm8_lemma6

@@ -1,3 +1,4 @@
+module
 /-
 Copyright (c) 2026 Kunal Relia. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
@@ -46,7 +47,7 @@ Authors: Kunal Relia
   Property 4 for (⇒); "just freeze the cover, remove the rest" for (⇐)).
 -/
 
-import VCCBGPartII.reptable_ops_properties
+public import VCCBGPartII.reptable_ops_properties
 /-! setting linters. -/
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
@@ -69,23 +70,23 @@ variable {G : SimpleGraph V} [DecidableRel G.Adj]
 /-- The invariant maintained throughout the paper's freeze/remove process:
     whenever an endpoint `u` is
     removed, every endpoint `v` adjacent to it is frozen. -/
-def RemoveInvariant (st : TableState G) : Prop :=
+public abbrev RemoveInvariant (st : TableState G) : Prop :=
   ∀ ⦃u v : V⦄, st.status u = Status.removed → G.Adj u v → st.status v = Status.frozen
 
 /-- "Every endpoint of the represents table is either frozen or removed" —
     (Property 3: the fully-populated table's endpoints are all
     of `V`). -/
-def AllFrozenOrRemoved (st : TableState G) : Prop :=
+public abbrev AllFrozenOrRemoved (st : TableState G) : Prop :=
   ∀ v : V, st.status v = Status.frozen ∨ st.status v = Status.removed
 
 /-- The set S'' of frozen endpoints recorded by a table state. -/
-def FrozenSet (st : TableState G) : Finset V :=
+public abbrev FrozenSet (st : TableState G) : Finset V :=
   Finset.univ.filter (fun v => st.status v = Status.frozen)
 
 /-- A `TableState` is a *valid freeze/remove outcome* of the process the
     paper describes: every endpoint is frozen or removed, and removal is
     always consistent with the neighbour-freezing invariant. -/
-def IsValidFreezeRemove (st : TableState G) : Prop :=
+public abbrev IsValidFreezeRemove (st : TableState G) : Prop :=
   RemoveInvariant st ∧ AllFrozenOrRemoved st
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -99,7 +100,7 @@ def IsValidFreezeRemove (st : TableState G) : Prop :=
     `hcubic`/`hbridgeless` are retained, as in `Lemma4` (a cubic
     bridgeless graph, for which the represents table is guaranteed to
     exist and be fully populated, Property 3). -/
-theorem Theorem4
+public theorem Theorem4
     (hcubic : ∀ v : V, G.degree v = 3)
     (hbridgeless : ∀ ⦃e : Sym2 V⦄, e ∈ G.edgeSet → ¬ G.IsBridge e)
     (S' : Finset V) :
@@ -149,7 +150,7 @@ theorem Theorem4
 
 /-- (⇒) direction, stated separately: a valid freeze/remove outcome's
     frozen set is a vertex cover. -/
-theorem validFreezeRemove_gives_vcover
+public theorem validFreezeRemove_gives_vcover
     (hcubic : ∀ v : V, G.degree v = 3)
     (hbridgeless : ∀ ⦃e : Sym2 V⦄, e ∈ G.edgeSet → ¬ G.IsBridge e)
     {st : TableState G} (hvalid : IsValidFreezeRemove st) :
@@ -158,7 +159,7 @@ theorem validFreezeRemove_gives_vcover
 
 /-- (⇐) direction, stated separately: every vertex cover is realized as
     the frozen set of some valid freeze/remove outcome. -/
-theorem vcover_gives_validFreezeRemove
+public theorem vcover_gives_validFreezeRemove
     (hcubic : ∀ v : V, G.degree v = 3)
     (hbridgeless : ∀ ⦃e : Sym2 V⦄, e ∈ G.edgeSet → ¬ G.IsBridge e)
     {S' : Finset V} (hvc : VCover G S') :

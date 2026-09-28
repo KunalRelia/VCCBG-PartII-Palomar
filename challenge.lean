@@ -1,3 +1,5 @@
+module
+
 import Mathlib
 
 set_option linter.unusedFintypeInType false

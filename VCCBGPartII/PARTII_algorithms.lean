@@ -1,3 +1,4 @@
+module
 /-
 Copyright (c) 2026 Kunal Relia. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
@@ -46,7 +47,7 @@ Authors: Kunal Relia
   line-by-line.
 -/
 
-import VCCBGPartII.thm7
+public import VCCBGPartII.thm7
 /-! setting linters. -/
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
@@ -72,12 +73,12 @@ variable {G : SimpleGraph V} [DecidableRel G.Adj]
     (Definition 14). Represents lists/status/score for these (and every
     other) endpoint live centrally in the enclosing table (`TableState`'s
     `reps`/`status`, plus `score` below), not per-row. -/
-abbrev Row (V : Type*) := V × V
+public abbrev Row (V : Type*) := V × V
 
 /-- The represents table threaded through Algorithms 2-8: `TableState G`
     (reused verbatim: `status`, `reps`) extended with the row order and
     representation score Algorithm 3 adds. -/
-structure RTable (G : SimpleGraph V) extends TableState G where
+public structure RTable (G : SimpleGraph V) extends TableState G where
   /-- Rows in insertion order = the paper's top-to-bottom table order. -/
   rows : List (Row V)
   /-- The representation score ζ_v (Algorithm 3 Line 3 onward). -/
@@ -85,7 +86,7 @@ structure RTable (G : SimpleGraph V) extends TableState G where
 
 /-- The `-∞` sentinel of Algorithm 3, Line 3. `Int` has no genuine `-∞`, so
     we use a value no honest score (bounded by table size) can reach. -/
-def negInf : Int := -1000000000
+public abbrev negInf : Int := -1000000000
 
 /-- Algorithm 2, Lines 1-2's starting point: no rows yet, and the columns
     initialized exactly as `initialState G` already does (every endpoint
@@ -94,7 +95,7 @@ def negInf : Int := -1000000000
     row has been inserted, reusing `initialState` directly rather than
     re-deriving "start every endpoint's represents list at its full
     neighbor set". -/
-noncomputable def RTable.empty (G : SimpleGraph V) [DecidableRel G.Adj] : RTable G where
+public noncomputable def RTable.empty (G : SimpleGraph V) [DecidableRel G.Adj] : RTable G where
   toTableState := initialState G
   rows  := []
   score := fun _ => negInf
@@ -102,7 +103,7 @@ noncomputable def RTable.empty (G : SimpleGraph V) [DecidableRel G.Adj] : RTable
 /-- Pointwise function update, `f[v ↦ a]`, used for "set endpoint v's
     column entry to a" (score column only — `status`/`reps` updates reuse
     `TableState.freeze`/direct field overrides below). -/
-def upd {α : Type*} (f : V → α) (v : V) (a : α) : V → α :=
+public abbrev upd {α : Type*} (f : V → α) (v : V) (a : α) : V → α :=
   fun w => if w = v then a else f w
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -117,7 +118,7 @@ def upd {α : Type*} (f : V → α) (v : V) (a : α) : V → α :=
     stay the *static* full neighbor sets throughout Phase II and are only
     ever mutated later, in Phase III, by `TableState.freeze`/the removal
     cascade of Algorithm 6. -/
-partial def bfsLevels (adj : V → List V) (start : V) : List (List V) :=
+public partial abbrev bfsLevels (adj : V → List V) (start : V) : List (List V) :=
   let rec go (frontier visited : List V) : List (List V) :=
     match frontier with
     | [] => []
@@ -131,7 +132,7 @@ partial def bfsLevels (adj : V → List V) (start : V) : List (List V) :=
 /-- Lines 6-9: find an `M`-edge from `u` to a vertex on the same level
     (Line 6-7), else to a vertex on the next level (Line 8-9). `inM u w`
     tests whether the edge `{u, w}` is one of the edges of `M`. -/
-def selectMEdge (adj : V → List V) (inM : V → V → Bool)
+public abbrev selectMEdge (adj : V → List V) (inM : V → V → Bool)
     (u : V) (sameLevel nextLevel : List V) : Option V :=
   match (adj u).find? (fun w => inM u w && sameLevel.contains w) with
   | some w => some w
@@ -140,7 +141,7 @@ def selectMEdge (adj : V → List V) (inM : V → V → Bool)
 /-- Line 13: "Remove from graph G the selected edge and all the edges that
     are connected to the two endpoints" — delete every edge incident to
     `x` from the (BFS-only) adjacency function. -/
-def removeIncidentEdges (adj : V → List V) (x : V) : V → List V :=
+public abbrev removeIncidentEdges (adj : V → List V) (x : V) : V → List V :=
   fun w => if w = x then [] else (adj w).filter (· ≠ x)
 
 /-- Lines 3-16, the double loop ("for each level ... for each unvisited
@@ -148,7 +149,7 @@ def removeIncidentEdges (adj : V → List V) (x : V) : V → List V :=
     Only `.rows` of the table is ever extended here (Line 12); `.reps`
     stays exactly the `RepList`-seeded value from `RTable.empty`, per the
     design note above. -/
-partial def populateLoop
+public partial def populateLoop
     (inM : V → V → Bool)
     (levels : List (List V)) (adj : V → List V) (visited : List V) (R : RTable G) :
     RTable G :=
@@ -184,7 +185,7 @@ partial def populateLoop
     reusing `RepList`/`Status` from `reptable_ops_properties.lean`
     without re-deriving them). `M` enters only through `inM`, the
     edge-membership test used to steer BFS edge selection (Lines 6-9). -/
-def populateRepresentsTable
+public abbrev populateRepresentsTable
     (adj0 : V → List V) (inM : V → V → Bool) (Vs : List V) : RTable G :=
   match Vs with
   | []      => RTable.empty G
@@ -201,7 +202,7 @@ def populateRepresentsTable
 /-- `M`, given as its total partner function, as a `G.Subgraph` — the
     bridge needed to reuse `RepTable G`'s `M : G.Subgraph` field (rather
     than re-deriving a `RepTable` from scratch). -/
-noncomputable def matchingSubgraph (M : V → V) (hMadj : ∀ v, G.Adj v (M v)) :
+public noncomputable abbrev matchingSubgraph (M : V → V) (hMadj : ∀ v, G.Adj v (M v)) :
     G.Subgraph where
   verts := Set.univ
   Adj   := fun u v => M u = v ∨ M v = u
@@ -220,7 +221,7 @@ noncomputable def matchingSubgraph (M : V → V) (hMadj : ∀ v, G.Adj v (M v)) 
     involutive partner function without fixed points (the standard
     "read off your partner" view of a perfect matching, reused wherever
     `RepTable.isPM` is needed). -/
-theorem matchingIsPerfectMatching
+public theorem matchingIsPerfectMatching
     (M : V → V) (hMinv : ∀ v, M (M v) = v) (hMadj : ∀ v, G.Adj v (M v)) :
     (matchingSubgraph (G := G) M hMadj).IsPerfectMatching := by
   refine ⟨fun v _ => ⟨M v, Or.inl rfl, ?_⟩, fun v => Set.mem_univ v⟩
@@ -239,7 +240,7 @@ theorem matchingIsPerfectMatching
     are taken as hypotheses elsewhere in this development rather than
     re-derived by induction on the algorithm's own loop, we take it here
     too. -/
-def RTable.toRepTable (R : RTable G) (M : V → V)
+public abbrev RTable.toRepTable (R : RTable G) (M : V → V)
     (hMinv : ∀ v, M (M v) = v) (hMadj : ∀ v, G.Adj v (M v))
     (hrow_pair : ∀ ⦃u v : V⦄, (matchingSubgraph (G := G) M hMadj).Adj u v →
       R.rows.findIdx (fun rc => rc.1 = u ∨ rc.2 = u) =
@@ -261,7 +262,7 @@ def RTable.toRepTable (R : RTable G) (M : V → V)
     freshly-recomputed values by the time `row` is reached, matching "for
     each row_j in R that is above row". `R.reps`/`R.status` here are
     exactly `TableState`'s fields (reused, not redefined). -/
-partial def computeRepresentationScore (R0 : RTable G) : RTable G :=
+public partial def computeRepresentationScore (R0 : RTable G) : RTable G :=
   let rec loop (processed : List (Row V)) (remaining : List (Row V)) (R : RTable G) :
       RTable G :=
     match remaining with
@@ -307,7 +308,7 @@ partial def computeRepresentationScore (R0 : RTable G) : RTable G :=
     `reptable_ops_properties.lean`) into the paper's fully
     recursive cascade, so it is transcribed directly rather than reused
     as a black box. -/
-partial def freezeAndRemove (R : RTable G) (S : Finset V)
+public partial def freezeAndRemove (R : RTable G) (S : Finset V)
     (psi omega : Option V) : RTable G × Finset V :=
   -- Freeze Operation of Represents Table (Lines 1-5).
   let (R, S) :=
@@ -352,7 +353,7 @@ partial def freezeAndRemove (R : RTable G) (S : Finset V)
     `R0.rows.reverse`). Both mirror-image sub-cases of Line 6 ("endpoint
     u in row remains and endpoint v in row is frozen") are handled, since
     the paper's `u`, `v` names within a row are otherwise arbitrary. -/
-partial def vertexElimination (R0 : RTable G) (S0 : Finset V) :
+public partial def vertexElimination (R0 : RTable G) (S0 : Finset V) :
     RTable G × Finset V :=
   let rec loop (rows : List (Row V)) (R : RTable G) (S : Finset V) :
       RTable G × Finset V :=
@@ -390,7 +391,7 @@ partial def vertexElimination (R0 : RTable G) (S0 : Finset V) :
     `ψ`, `ω` is `≠ ∅` on any genuine call; this is documented, not
     additionally enforced as a checked precondition, exactly as the
     paper's own comment is documentation rather than an assertion. -/
-partial def duadicHop (R : RTable G) (S : Finset V)
+public partial def duadicHop (R : RTable G) (S : Finset V)
     (psi omega : Option V) (lam : Finset V) : RTable G × Finset V × Finset V :=
   -- Line 2: if ω ≠ ∅
   let (R, S, lam) :=
@@ -454,7 +455,7 @@ partial def duadicHop (R : RTable G) (S : Finset V)
     the end of each pass, i.e. logically before the next), which we
     capture by calling `duadicHop` fresh from the saved original state
     each time. -/
-partial def diminishingHops (R0 : RTable G) (S0 : Finset V) : RTable G × Finset V :=
+public partial def diminishingHops (R0 : RTable G) (S0 : Finset V) : RTable G × Finset V :=
   let rec go (rows : List (Row V)) (Rd : RTable G) (Sd : Finset V) (lamd : Finset V) :
       RTable G × Finset V :=
     match rows with
@@ -481,7 +482,7 @@ partial def diminishingHops (R0 : RTable G) (S0 : Finset V) : RTable G × Finset
 /-- **Algorithm 3**. `m` (Line 6, `⌈m/2⌉`-many rounds) is read off as the
     number of rows already inserted into `R` by Algorithm 2 (one row per
     matching edge, Definition 14), i.e. `R0.rows.length`. -/
-partial def diminishingHopPhase (R0 : RTable G) : Finset V :=
+public partial abbrev diminishingHopPhase (R0 : RTable G) : Finset V :=
   let S0 : Finset V := ∅                                                -- Line 1
   let R1 : RTable G := { R0 with score := fun _ => negInf }              -- Lines 2-3
   let R2 := computeRepresentationScore R1                                -- Line 4 (Algorithm 4)
@@ -506,7 +507,7 @@ partial def diminishingHopPhase (R0 : RTable G) : Finset V :=
     adjacency-list function, needed by Algorithm 2's BFS. Since `M` is a
     perfect matching, `{ (v, M v) : v ∈ Vs, v <lex M v }` enumerates each
     matching edge exactly once (Line 3). -/
-def vertexCover
+public abbrev vertexCover
     (adj0 : V → List V) (Vs : List V) (M : V → V) (lt : V → V → Bool)
     (k : ℕ) : Bool :=
   -- Line 1: Vs (already supplied as an argument, per the design note above).

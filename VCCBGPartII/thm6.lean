@@ -1,3 +1,4 @@
+module
 /-
 Copyright (c) 2026 Kunal Relia. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
@@ -54,7 +55,7 @@ Authors: Kunal Relia
     freezes" once every endpoint is frozen-or-removed.
 -/
 
-import VCCBGPartII.thm4
+public import VCCBGPartII.thm4
 /-! setting linters. -/
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
@@ -75,7 +76,7 @@ variable {G : SimpleGraph V} [DecidableRel G.Adj]
 -- ═══════════════════════════════════════════════════════════════════════════
 
 /-- `MinVCover G S`: S is a vertex cover of minimum cardinality. -/
-def MinVCover (G : SimpleGraph V) (S : Finset V) : Prop :=
+public abbrev MinVCover (G : SimpleGraph V) (S : Finset V) : Prop :=
   VCover G S ∧ ∀ T : Finset V, VCover G T → S.card ≤ T.card
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -86,7 +87,7 @@ def MinVCover (G : SimpleGraph V) (S : Finset V) : Prop :=
     of the represents table `R`, both currently frozen in state `st` — a
     "duad" in the paper's terminology (a row with both its endpoints
     frozen). -/
-def IsDuad (R : RepTable G) (st : TableState G) (u v : V) : Prop :=
+public abbrev IsDuad (R : RepTable G) (st : TableState G) (u v : V) : Prop :=
   u ≠ v ∧ R.row u = R.row v ∧ st.status u = Status.frozen ∧ st.status v = Status.frozen
 
 /-- **Restricted case** (paper, lines 1413-1419 / footnote 37): the
@@ -97,7 +98,7 @@ def IsDuad (R : RepTable G) (st : TableState G) (u v : V) : Prop :=
     proof of the (⇐) direction (lines 1439-1443); we take it directly as a
     hypothesis rather than re-deriving it, taking `hbridgeless` as an explicit,
     undischarged hypothesis. -/
-def ExactlyOneDuad (R : RepTable G) (st : TableState G) : Prop :=
+public abbrev ExactlyOneDuad (R : RepTable G) (st : TableState G) : Prop :=
   ∃! i : ℕ, ∃ u v : V, R.row u = i ∧ R.row v = i ∧
     u ≠ v ∧ st.status u = Status.frozen ∧ st.status v = Status.frozen
 
@@ -109,7 +110,7 @@ def ExactlyOneDuad (R : RepTable G) (st : TableState G) : Prop :=
     hop's internal remove/freeze bookkeeping (Definition 19(iii)-(iv)),
     exactly as `Property4`/`Theorem4` only need "every endpoint frozen or
     removed, consistently with removal" to conclude a vertex cover. -/
-structure DuadicHop (R : RepTable G) (st : TableState G) where
+public structure DuadicHop (R : RepTable G) (st : TableState G) where
   u : V
   v : V
   duad : IsDuad R st u v
@@ -122,7 +123,7 @@ structure DuadicHop (R : RepTable G) (st : TableState G) where
     in both `st` and `st'`, the frozen count and removed count partition
     `Fintype.card V` in each state, so a smaller frozen count is exactly a
     net gain of removed over frozen endpoints during the hop). -/
-structure DiminishingHop (R : RepTable G) (st : TableState G)
+public structure DiminishingHop (R : RepTable G) (st : TableState G)
     extends DuadicHop R st where
   smaller : (FrozenSet st').card < (FrozenSet st).card
 
@@ -143,7 +144,7 @@ structure DiminishingHop (R : RepTable G) (st : TableState G)
     theorem / Lemma 4, that `R` comes from a perfect matching and hence
     has `|V|/2` rows — this is exactly the fact packaged into `hsize` and
     `hrestricted` here. -/
-theorem Theorem6
+public theorem Theorem6
     (hcubic : ∀ v : V, G.degree v = 3)
     (hbridgeless : ∀ ⦃e : Sym2 V⦄, e ∈ G.edgeSet → ¬ G.IsBridge e)
     (R : RepTable G) (st : TableState G)
@@ -191,7 +192,7 @@ theorem Theorem6
 -- §4. Directional corollaries, matching the paper's (⇒)/(⇐) split verbatim
 -- ═══════════════════════════════════════════════════════════════════════════
 
-theorem no_diminishingHop_implies_min
+public theorem no_diminishingHop_implies_min
     (hcubic : ∀ v : V, G.degree v = 3)
     (hbridgeless : ∀ ⦃e : Sym2 V⦄, e ∈ G.edgeSet → ¬ G.IsBridge e)
     (R : RepTable G) (st : TableState G)
@@ -202,7 +203,7 @@ theorem no_diminishingHop_implies_min
     MinVCover G (FrozenSet st) :=
   (Theorem6 hcubic hbridgeless R st hvalid hrestricted hsize).mpr hno
 
-theorem min_implies_no_diminishingHop
+public theorem min_implies_no_diminishingHop
     (hcubic : ∀ v : V, G.degree v = 3)
     (hbridgeless : ∀ ⦃e : Sym2 V⦄, e ∈ G.edgeSet → ¬ G.IsBridge e)
     (R : RepTable G) (st : TableState G)

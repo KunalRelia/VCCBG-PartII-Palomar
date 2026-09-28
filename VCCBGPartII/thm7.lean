@@ -1,3 +1,4 @@
+module
 /-
 Copyright (c) 2026 Kunal Relia. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
@@ -38,7 +39,7 @@ Authors: Kunal Relia
     reasoning about `FrozenSet`, `DiminishingHop`, and `Theorem4`.
 -/
 
-import VCCBGPartII.thm6
+public import VCCBGPartII.thm6
 /-! setting linters. -/
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
@@ -74,7 +75,7 @@ variable {G : SimpleGraph V} [DecidableRel G.Adj]
       already a minimum vertex cover (the perfect-matching/Lemma-1 regime).
     • `hduad_exists`: if `S` has *more* than `|V|/2` frozen endpoints,
       some row of `R` is a duad w.r.t. `st` (the pigeonhole regime). -/
-theorem Theorem7
+public theorem Theorem7
     (hcubic : ∀ v : V, G.degree v = 3)
     (hbridgeless : ∀ ⦃e : Sym2 V⦄, e ∈ G.edgeSet → ¬ G.IsBridge e)
     (R : RepTable G) (st : TableState G)
@@ -129,7 +130,7 @@ theorem Theorem7
 -- §2. Directional corollaries, matching the paper's (⇒)/(⇐) split verbatim
 -- ═══════════════════════════════════════════════════════════════════════════
 
-theorem no_diminishingHop_implies_min'
+public theorem no_diminishingHop_implies_min'
     (hcubic : ∀ v : V, G.degree v = 3)
     (hbridgeless : ∀ ⦃e : Sym2 V⦄, e ∈ G.edgeSet → ¬ G.IsBridge e)
     (R : RepTable G) (st : TableState G)
@@ -143,7 +144,7 @@ theorem no_diminishingHop_implies_min'
     MinVCover G (FrozenSet st) :=
   (Theorem7 hcubic hbridgeless R st hvalid hsize_lb hbase_case hduad_exists).mpr hno
 
-theorem min_implies_no_diminishingHop'
+public theorem min_implies_no_diminishingHop'
     (hcubic : ∀ v : V, G.degree v = 3)
     (hbridgeless : ∀ ⦃e : Sym2 V⦄, e ∈ G.edgeSet → ¬ G.IsBridge e)
     (R : RepTable G) (st : TableState G)

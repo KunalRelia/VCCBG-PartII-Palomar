@@ -3,6 +3,7 @@ Copyright (c) 2026 Kunal Relia. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Kunal Relia
 -/
+module
 /-
   Formal Lean 4 / Mathlib Verification of Lemma 7
   "Algorithm 7 (Diminishing Hops) is an algorithm to perform an
@@ -86,12 +87,13 @@ Authors: Kunal Relia
 -/
 
 
-import VCCBGPartII.PARTII_algorithms
+public import VCCBGPartII.PARTII_algorithms
 /-! setting linters. -/
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 set_option linter.unusedSectionVars false
 set_option linter.unusedVariables false
+set_option linter.unusedSimpArgs false
 
 open Finset
 
@@ -115,7 +117,7 @@ variable {G : SimpleGraph V} [DecidableRel G.Adj]
     from removing `u`, one from removing `v` — matching Algorithm 7 Line
     11's "does an S-duadic hop for each of the endpoints in a duad"
     before Lines 14-18 pick the smaller of the two. -/
-structure HopCandidate (R : RepTable G) (st : TableState G) (u v : V) where
+public structure HopCandidate (R : RepTable G) (st : TableState G) (u v : V) where
   st' : TableState G
   valid' : IsValidFreezeRemove st'
 
@@ -132,7 +134,7 @@ def HopCandidate.toDuadicHop {R : RepTable G} {st : TableState G} {u v : V}
     offers (removing `u`, removing `v`), if either candidate's resulting
     frozen set is strictly smaller than the current one, a `DiminishingHop`
     exists. -/
-theorem Lemma7_duad
+public theorem Lemma7_duad
     (R : RepTable G) (st : TableState G) {u v : V} (hduad : IsDuad R st u v)
     (Hu Hv : HopCandidate R st u v)
     (hsmaller :
@@ -149,7 +151,7 @@ theorem Lemma7_duad
     sets are `≥` the current one, this particular duad contributes no
     diminishing hop — Algorithm 7 must move on to the next row (Lines
     23-26). -/
-theorem Lemma7_duad_none
+public theorem Lemma7_duad_none
     (R : RepTable G) (st : TableState G) {u v : V} (hduad : IsDuad R st u v)
     (Hu Hv : HopCandidate R st u v)
     (hHu : (FrozenSet st).card ≤ (FrozenSet Hu.st').card)
@@ -166,7 +168,7 @@ theorem Lemma7_duad_none
     R where each endpoint is either frozen or removed and a vertex cover
     S that corresponds to the frozen endpoints in the table R, Algorithm 7
     is an algorithm to perform an S-diminishing hop if it exists." -/
-theorem Lemma7
+public theorem Lemma7
     (R : RepTable G) (st : TableState G)
     (hex :
       ∃ (u v : V) (hduad : IsDuad R st u v) (Hu Hv : HopCandidate R st u v),
@@ -182,7 +184,7 @@ theorem Lemma7
     is *found by the algorithm's search*, not merely known to exist
     abstractly): if no duad in the table offers a strictly smaller hop on
     either endpoint, no `S`-diminishing hop exists. -/
-theorem no_diminishing_candidate_implies_no_hop
+public theorem no_diminishing_candidate_implies_no_hop
     (R : RepTable G) (st : TableState G)
     (hnone :
       ∀ (u v : V), IsDuad R st u v → ∀ Hu Hv : HopCandidate R st u v,
@@ -237,14 +239,14 @@ theorem no_diminishing_candidate_implies_no_hop
     left untouched — Algorithm 8's freeze step, unlike Algorithm 6's, does
     not delist anything, cf. the "no deletion" remark on `Status` in
     `reptable_ops_properties.lean`.) -/
-def freezeOne (R : RTable G) (S : Finset V) (u : V) : RTable G × Finset V :=
+public abbrev freezeOne (R : RTable G) (S : Finset V) (u : V) : RTable G × Finset V :=
   ({ R with status := upd R.status u Status.frozen }, insert u S)
 
 /-- The endpoints Algorithm 8's removal step (Lines 9-17) considers when
     removing `ω`: every endpoint `u` with `u ∈ R.reps ω` (paper "L_ω") or
     `ω ∈ R.reps u` ("u represents ω"), i.e. Lines 10 and 18 of Algorithm 8
     combined into one `Finset.filter`. -/
-def removalPartners (R : RTable G) (ω : V) : Finset V :=
+public abbrev removalPartners (R : RTable G) (ω : V) : Finset V :=
   Finset.univ.filter (fun u => u ∈ R.reps ω ∨ ω ∈ R.reps u)
 
 /-- Given the row `(a, b)` found for endpoint `u` (i.e. `a = u` or
@@ -256,7 +258,7 @@ def removalPartners (R : RTable G) (ω : V) : Finset V :=
     `if _ ∈ S' then ...` that follows it — the nesting that broke an
     earlier draft of the proof below (`split` would land on the wrong,
     inner `if`). -/
-def partnerOf (row : Row V) (u : V) : V :=
+public abbrev partnerOf (row : Row V) (u : V) : V :=
   if row.1 = u then row.2 else row.1
 
 /-- **Structural core of Algorithm 8** (`dh`): processes either the
@@ -272,7 +274,7 @@ def partnerOf (row : Row V) (u : V) : V :=
     this compiles as ordinary structural recursion.
     `(dh n R S lam s).2.2` is the updated visited set `λ`; `.1` is the
     updated table; `.2.1` is the updated cover. -/
-noncomputable def dh : Nat → RTable G → Finset V → Finset V → (V ⊕ List V) →
+public noncomputable abbrev dh : Nat → RTable G → Finset V → Finset V → (V ⊕ List V) →
     RTable G × Finset V × Finset V
   | 0,     R, S, lam, _ => (R, S, lam)
   | n + 1, R, S, lam, Sum.inl ω =>
@@ -314,7 +316,7 @@ noncomputable def dh : Nat → RTable G → Finset V → Finset V → (V ⊕ Lis
     `induction n` covers every case: this is genuine structural induction
     on `dh`'s own recursive definition, and no termination or bookkeeping
     fact here is taken as a hypothesis. -/
-theorem dh_status_frozen :
+public theorem dh_status_frozen :
     ∀ (n : ℕ) (R : RTable G) (S lam : Finset V) (s : V ⊕ List V),
       AllFrozenOrRemoved R.toTableState → FrozenSet R.toTableState = S →
       AllFrozenOrRemoved (dh n R S lam s).1.toTableState ∧
@@ -458,7 +460,7 @@ theorem dh_status_frozen :
 /-- The one fact about the cascade that is **not** mere bookkeeping: no
     two graph-adjacent endpoints are ever both left `removed` at the end
     of a single call to `dh (Sum.inl ω)`. -/
-def NoAdjacentDoubleRemoval (n : ℕ) (R : RTable G) (S lam : Finset V) (ω : V) : Prop :=
+public abbrev NoAdjacentDoubleRemoval (n : ℕ) (R : RTable G) (S lam : Finset V) (ω : V) : Prop :=
   ∀ v w, G.Adj v w →
     (dh n R S lam (Sum.inl ω)).1.status v = Status.removed →
     (dh n R S lam (Sum.inl ω)).1.status w ≠ Status.removed
@@ -468,7 +470,7 @@ def NoAdjacentDoubleRemoval (n : ℕ) (R : RTable G) (S lam : Finset V) (ω : V)
     `v` is removed and adjacent to `w`, `w` cannot also be removed
     (`NoAdjacentDoubleRemoval`), so by `AllFrozenOrRemoved` it must be
     frozen. -/
-theorem dh_removeInvariant
+public theorem dh_removeInvariant
     (n : ℕ) (R : RTable G) (S lam : Finset V) (ω : V)
     (hAll : AllFrozenOrRemoved R.toTableState) (hFS : FrozenSet R.toTableState = S)
     (hNoAdj : NoAdjacentDoubleRemoval n R S lam ω) :
@@ -482,7 +484,7 @@ theorem dh_removeInvariant
     cascade: a genuine `IsValidFreezeRemove` outcome with matching
     `FrozenSet`, replacing the earlier `DuadicHopSound` hypothesis with a
     theorem. -/
-theorem dh_valid
+public theorem dh_valid
     (n : ℕ) (R : RTable G) (S lam : Finset V) (ω : V)
     (hAll : AllFrozenOrRemoved R.toTableState) (hFS : FrozenSet R.toTableState = S)
     (hNoAdj : NoAdjacentDoubleRemoval n R S lam ω) :
@@ -527,7 +529,7 @@ noncomputable def dh_gives_candidate
     bookkeeping are proved, closing the gap the commentary
     of `PARTII_algorithms.lean` §10 leaves open ("connecting the
     two is a natural follow-on"). -/
-theorem Lemma7_exec
+public theorem Lemma7_exec
     (R : RepTable G) (RT : RTable G) (S : Finset V) {u v : V}
     (hduad : IsDuad R (RT.toTableState) u v)
     (hall : AllFrozenOrRemoved RT.toTableState)

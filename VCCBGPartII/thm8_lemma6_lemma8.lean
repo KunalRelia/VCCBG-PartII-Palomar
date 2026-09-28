@@ -3,6 +3,7 @@ Copyright (c) 2026 Kunal Relia. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Kunal Relia
 -/
+module
 /-
   Formal Lean 4 / Mathlib Verification of Lemma 8
   "It takes at most m/2 S-duadic hops to ensure that there is no
@@ -35,7 +36,7 @@ Authors: Kunal Relia
   by `omega`.
 -/
 
-import VCCBGPartII.thm8_lemma6_lemma7
+public import VCCBGPartII.thm8_lemma6_lemma7
 /-! setting linters. -/
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
@@ -93,17 +94,17 @@ private lemma descent_lemma :
 -- ═══════════════════════════════════════════════════════════════════════════
 
 /-- The set of row indices actually used by `R`. -/
-def RowsOf (R : RepTable G) : Finset ℕ := Finset.image R.row Finset.univ
+public abbrev RowsOf (R : RepTable G) : Finset ℕ := Finset.image R.row Finset.univ
 
 /-- Row index `i` is currently a **duad row**: some pair of distinct
     endpoints sharing row `i` are both frozen in state `st` (reusing
     `IsDuad` from `thm6.lean` verbatim). -/
-def IsDuadRow (R : RepTable G) (st : TableState G) (i : ℕ) : Prop :=
+public abbrev IsDuadRow (R : RepTable G) (st : TableState G) (i : ℕ) : Prop :=
   ∃ u v : V, R.row u = i ∧ IsDuad R st u v
 
 /-- The (finite) set of duad-row indices of the represents table `R` in
     state `st` — the paper's "rows with a duad". -/
-noncomputable def DuadRows (R : RepTable G) (st : TableState G) : Finset ℕ := by
+public noncomputable abbrev DuadRows (R : RepTable G) (st : TableState G) : Finset ℕ := by
   classical
   exact (RowsOf R).filter (fun i => IsDuadRow R st i)
 
@@ -115,7 +116,7 @@ private lemma mem_DuadRows_iff (R : RepTable G) (st : TableState G) (i : ℕ) :
 private lemma DuadRows_eq_filter (R : RepTable G) (st : TableState G) :
     DuadRows R st = (RowsOf R).filter (fun i => IsDuadRow R st i) := by
   classical
-  ext i; rw [mem_DuadRows_iff, Finset.mem_filter]
+  ext i; rw [mem_DuadRows_iff]
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- §3. Lemma 8 (numerical core)
@@ -129,7 +130,7 @@ private lemma DuadRows_eq_filter (R : RepTable G) (st : TableState G) :
     at which no `S`-diminishing hop exists.
 
     `hstep` is proved rather than assumed in §6 below. -/
-theorem Lemma8
+public theorem Lemma8
     (R : RepTable G) (Sseq : ℕ → TableState G)
     (hstep : ∀ k, (∃ _ : DiminishingHop R (Sseq k), True) →
       (DuadRows R (Sseq (k + 1))).card < (DuadRows R (Sseq k)).card) :
@@ -140,7 +141,7 @@ theorem Lemma8
     (le_refl _) hstep
 
 /-- **Lemma 8, paper's explicit `m/2 − 1` bound.** -/
-theorem Lemma8_paper_bound
+public theorem Lemma8_paper_bound
     (R : RepTable G) (Sseq : ℕ → TableState G)
     (hduad_bound : (DuadRows R (Sseq 0)).card ≤ Fintype.card V / 2 - 1)
     (hstep : ∀ k, (∃ _ : DiminishingHop R (Sseq k), True) →
@@ -151,7 +152,7 @@ theorem Lemma8_paper_bound
 
 /-- If, in addition, `Sseq` is stationary once no S-diminishing hop is
     available, `Theorem6`/`Theorem7` apply from that point on. -/
-theorem Lemma8_stationary
+public theorem Lemma8_stationary
     (R : RepTable G) (Sseq : ℕ → TableState G)
     (hstep : ∀ k, (∃ _ : DiminishingHop R (Sseq k), True) →
       (DuadRows R (Sseq (k + 1))).card < (DuadRows R (Sseq k)).card)
@@ -184,7 +185,7 @@ theorem Lemma8_stationary
     algorithm behaves — and holds by construction whenever `R.row` is
     built from a perfect matching's edge list (one row per matching
     edge). -/
-def TwoPerRow (R : RepTable G) : Prop :=
+public abbrev TwoPerRow (R : RepTable G) : Prop :=
   ∀ i ∈ RowsOf R, ∃ u v : V,
     u ≠ v ∧ R.row u = i ∧ R.row v = i ∧ ∀ w, R.row w = i → w = u ∨ w = v
 
@@ -192,7 +193,7 @@ def TwoPerRow (R : RepTable G) : Prop :=
     endpoints sharing a row are joined by an edge of `G` — again a static
     fact about the represents table's construction, not about algorithm
     behaviour. -/
-def RowsAreEdges (R : RepTable G) : Prop :=
+public abbrev RowsAreEdges (R : RepTable G) : Prop :=
   ∀ (i : ℕ) (u v : V), u ≠ v → R.row u = i → R.row v = i → G.Adj u v
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -265,8 +266,8 @@ private lemma fiber_card
         constructor
         · rintro ⟨(rfl | rfl), hwFS⟩
           · rfl
-          · exact absurd hwFS hvF2
-        · rintro rfl; exact ⟨Or.inl rfl, huF⟩
+          · exact False.elim (hvF2 (by simpa using hwFS))
+        · rintro rfl; exact ⟨Or.inl rfl, by simpa using huF⟩
       have hnd : ¬ IsDuadRow R st i :=
         not_duad_of_not_both R st hne hru hrv huniq (fun h => hvF2 ((hFSmem v).mpr h.2))
       rw [heq, Finset.card_singleton, ite_eq_right hnd]
@@ -285,9 +286,9 @@ private lemma fiber_card
         simp only [Finset.mem_filter, Finset.mem_insert, Finset.mem_singleton]
         constructor
         · rintro ⟨(rfl | rfl), hwFS⟩
-          · exact absurd hwFS huF2
+          · exact False.elim (huF2 (by simpa using hwFS))
           · rfl
-        · rintro rfl; exact ⟨Or.inr rfl, hvF⟩
+        · rintro rfl; exact ⟨Or.inr rfl, by simpa using hvF⟩
       have hnd : ¬ IsDuadRow R st i :=
         not_duad_of_not_both R st hne hru hrv huniq (fun h => huF2 ((hFSmem u).mpr h.1))
       rw [heq, Finset.card_singleton, ite_eq_right hnd]
@@ -296,7 +297,7 @@ private lemma fiber_card
     frozen set is a vertex cover, `|FrozenSet st| = (number of rows) +
     (number of duad rows)`. Proved by summing `fiber_card`'s per-row
     contribution over all rows via `Finset.card_eq_sum_card_fiberwise`. -/
-theorem frozen_card_eq_rows_add_duads
+public theorem frozen_card_eq_rows_add_duads
     (R : RepTable G) (st : TableState G)
     (htwo : TwoPerRow R) (hedges : RowsAreEdges R)
     (hcov : VCover G (FrozenSet st)) :
@@ -330,7 +331,7 @@ theorem frozen_card_eq_rows_add_duads
     `omega`. This is exactly what Algorithm 7's Line 14 checks (cover
     size), so accepting a hop there is, via this identity, exactly
     accepting a hop that decreases the duad count. -/
-theorem duad_decrease_from_cover_decrease
+public theorem duad_decrease_from_cover_decrease
     (R : RepTable G) (htwo : TwoPerRow R) (hedges : RowsAreEdges R)
     (st st' : TableState G)
     (hcov : VCover G (FrozenSet st)) (hcov' : VCover G (FrozenSet st'))
@@ -351,7 +352,7 @@ theorem duad_decrease_from_cover_decrease
     algorithm's running state and requires no assumption about which
     *rows* end up duads. Everything from there to "at most (initial duad
     count) hops suffice" is proved, not assumed. -/
-theorem Lemma8_final
+public theorem Lemma8_final
     (R : RepTable G) (Sseq : ℕ → TableState G)
     (htwo : TwoPerRow R) (hedges : RowsAreEdges R)
     (hcov : ∀ k, VCover G (FrozenSet (Sseq k)))
@@ -366,7 +367,7 @@ theorem Lemma8_final
 /-- Specializing `hcov` to its usual source: every `Sseq k` is itself a
     valid freeze/remove outcome, so its cover comes straight from
     `Theorem4`. -/
-theorem Lemma8_final_from_valid
+public theorem Lemma8_final_from_valid
     (R : RepTable G) (Sseq : ℕ → TableState G)
     (hcubic : ∀ v : V, G.degree v = 3)
     (hbridgeless : ∀ ⦃e : Sym2 V⦄, e ∈ G.edgeSet → ¬ G.IsBridge e)
