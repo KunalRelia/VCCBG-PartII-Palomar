@@ -63,7 +63,7 @@ public theorem VCCBGPartII.Theorem8_wrapper
               (SseqOf ((Fintype.card V) ^ 2) (RT0Of (G := G) adj0 Vs M) n), True) →
         SseqOf ((Fintype.card V) ^ 2) (RT0Of (G := G) adj0 Vs M) (n + 1)
           = SseqOf ((Fintype.card V) ^ 2) (RT0Of (G := G) adj0 Vs M) n) :
-    vertexCover (G := G) adj0 Vs M lt k = true ↔ YesInstance G k :=
-  Theorem8 hcubic hbridgeless adj0 Vs M lt k hMinv hMadj hrow_pair htwo hedges
+    vertexCover (G := G) adj0 Vs M lt k = true ↔ YesInstance G k := by
+  exact Theorem8 hcubic hbridgeless adj0 Vs M lt k hMinv hMadj hrow_pair htwo hedges
     hrows_half hmatchingEdges_card hV_pos hRowsCoverAll hRemoveInv0 hFS0 hNoAdjAll
     hphase_eq hSseq_step hstationary
