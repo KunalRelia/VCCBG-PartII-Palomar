@@ -8,23 +8,24 @@ set_option linter.unusedSectionVars false
 set_option linter.unusedVariables false
 set_option linter.defProp false
 /-!
-# Advertised statement — Lemma 6
+# Advertised statement — Theorem 8
 
-"If Algorithm 1 returns Yes, then the given instance of VC − CBG is a
-   Yes instance." (§7 of the paper ("Proof of Correctness"), p.58-61, lines 1775-1922)
+  "Algorithm 1 (VERTEX_COVER) returns Yes on input (G, k) if and only if the
+   given instance of VC − CBG is a Yes instance." (§7 of the paper
+   ("Proof of Correctness"), pp.58-61, lines 1750-1922; Lemma 5 + Lemma 6)
 
-This file is entirely self-contained: it imports only `Mathlib` and
+  This file is entirely self-contained: it imports only `Mathlib` and
   re-derives, verbatim, every definition transitively needed to *state*
-  `Lemma6` but none of the intermediate theorems those files use to
+  `Theorem8` but none of the intermediate theorems those files use to
   *prove* it, since those are not needed merely to write the statement
-  down. The final theorem, `VCCBGPartII.Lemma6_wrapper`, is left as a
+  down. The final theorem, `VCCBGPartII.Theorem8_wrapper`, is left as a
   `sorry`.
 -/
 
 open Finset
 
 -- ═══════════════════════════════════════════════════════════════════════════
--- §0. Section variables (matching `thm8_lemma6.lean`, the strongest of the
+-- §0. Section variables (matching `thm8.lean` / `thm8_lemma6.lean`, the strongest of the
 --     section-variable lists needed anywhere below).
 -- ═══════════════════════════════════════════════════════════════════════════
 
@@ -650,15 +651,15 @@ public def PhaseMatchesAlgState (fuel : ℕ) (R0 : RTable G) (R : RepTable G) : 
   diminishingHopPhase R0 = (algState fuel R0 (RowsOf R).card).2
 
 -- ═══════════════════════════════════════════════════════════════════════════
--- §10. The challenge: Lemma 6
+-- §10. The challenge: Theorem 8
 -- ═══════════════════════════════════════════════════════════════════════════
 
-/-- **Lemma 6** (paper, p.58, lines 1776-1920), the result being submitted. -/
-public theorem VCCBGPartII.Lemma6_wrapper
+/-- **Theorem 8** (paper, §7, combining Lemma 5 and Lemma 6, pp.58-61,
+    lines 1750-1922), the result being submitted. -/
+public theorem VCCBGPartII.Theorem8_wrapper
     (hcubic : ∀ v : V, G.degree v = 3)
     (hbridgeless : ∀ ⦃e : Sym2 V⦄, e ∈ G.edgeSet → ¬ G.IsBridge e)
     (adj0 : V → List V) (Vs : List V) (M : V → V) (lt : V → V → Bool) (k : ℕ)
-    (hyes : vertexCover (G := G) adj0 Vs M lt k = true)
     (hMinv : ∀ v, M (M v) = v) (hMadj : ∀ v, G.Adj v (M v))
     (hrow_pair : ∀ ⦃u v : V⦄, (matchingSubgraph (G := G) M hMadj).Adj u v →
         (RT0Of (G := G) adj0 Vs M).rows.findIdx (fun rc => rc.1 = u ∨ rc.2 = u) =
@@ -667,6 +668,9 @@ public theorem VCCBGPartII.Lemma6_wrapper
     (hedges : RowsAreEdges ((RT0Of (G := G) adj0 Vs M).toRepTable M hMinv hMadj hrow_pair))
     (hrows_half :
       (RowsOf ((RT0Of (G := G) adj0 Vs M).toRepTable M hMinv hMadj hrow_pair)).card
+        = Fintype.card V / 2)
+    (hmatchingEdges_card :
+      (Vs.filterMap (fun u => if lt u (M u) then some (u, M u) else none)).length
         = Fintype.card V / 2)
     (hV_pos : 0 < Fintype.card V)
     (hRowsCoverAll : ∀ w : V,
@@ -690,5 +694,5 @@ public theorem VCCBGPartII.Lemma6_wrapper
               (SseqOf ((Fintype.card V) ^ 2) (RT0Of (G := G) adj0 Vs M) n), True) →
         SseqOf ((Fintype.card V) ^ 2) (RT0Of (G := G) adj0 Vs M) (n + 1)
           = SseqOf ((Fintype.card V) ^ 2) (RT0Of (G := G) adj0 Vs M) n) :
-    YesInstance G k := by
+    vertexCover (G := G) adj0 Vs M lt k = true ↔ YesInstance G k := by
   sorry

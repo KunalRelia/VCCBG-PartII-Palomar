@@ -5,67 +5,31 @@
 version: "v0.4"
 
 project:
-  name: "Test Formalization of Lemma 6 of the VCCBG paper"
+  name: "Formalization of Theorem 8 of the VCCBG paper"
   description: >-
-    This is a test check of formalization of one part of the the paper on the complexity  
+    This is a formalization of the core part of the paper on the complexity  
     of the vertex cover problem on cubic bridgeless graphs (VCCBG). Specifically, Part II
     of the VCCBG paper presents an unconditional deterministic polynomial-time algorithm for
-    VCCBG. The formalization here is of one direction of the proof of correctness of the algorihtm. 
-    It proves that ``If Algorithm 1 returns Yes, then the given instance of VC − CBG is a
-    Yes instance'' (Lemma 6). The formalization strictly follows the paper's structure 
-    and first formalizes a novel data structure (represents table) and a novel concept (diminishing hops
+    VCCBG. The formalization here is of the proof of correctness of the algorithm. 
+    It proves the theorem via two lemmas: "If Algorithm 1 returns Yes, then the given instance of VCCBG is a
+    Yes instance" (Lemma 6) and "If the given instance of VCCBG is a Yes instance, then Algorithm 1 returns Yes"
+    (Lemma 5). The formalization strictly follows the paper's structure: 
+    it first formalizes a novel data structure (represents table) and a novel concept (diminishing hops
     analogous to augmenting paths used for maximum matching), a novel graph-theory result (bridging 
-    diminishing hops and minimum vertex cover analogous to the Berge Theorem), and discovers an 
-    algorithm that uses diminishing hops to find a minimum vertex cover (analogous to Blossom
-    Algorithm using augmenting paths to find maximum matching due to Berge Theorem).
-  # Required nonempty list of name strings or mappings with a nonempty name.
+    diminishing hops and minimum vertex cover analogous to Berge's Theorem), and discovers an 
+    algorithm that uses diminishing hops to find a minimum vertex cover (analogous to the Blossom
+    Algorithm using augmenting paths to find a maximum matching due to Berge Theorem).
   authors:
     - Kunal Relia
-  # Required root licence. Keep this in sync with the Apache-2.0 LICENSE file.
   license: "Apache-2.0"
-  # Required nonempty list of name strings or mappings with a nonempty name.
-  # For a thin wrapper, name people responsible for this submitted wrapper;
-  # submission authorization separately covers the underlying formalization.
   responsible_maintainers:
     - Kunal Relia
-# Omit repository for an ordinary project: Palomar treats this submitted
-# repository as the substantive proof development. If this repository is only
-# a thin Comparator wrapper, uncomment and pin the actual formalization in this
-# exact shape:
-# repository:
-#   substantive_formalization:
-#     id: "TEMPLATE: owner/repository or https://github.com/owner/repository"
-#     revision: "TEMPLATE: full 40-character lowercase commit SHA"
 
 classification:
-  # Use 1–2 official arXiv identifiers such as math.LO and 1–8 five-character
-  # MSC 2020 identifiers such as 03B35.
   arxiv: [cs.CC, cs.DS]
   msc2020: ["68Q15", "68P05", "68W40", "05C70"]
 
 sources:
-  # Sources must be nonempty. Every source needs a title and relationship; the
-  # relationship must be exactly formalizes, adapts, independently-proves,
-  # background, or other.
-  # Choose one result origin:
-  # - For a theorem first presented by this formalization, set one source to
-  #   type: original-proof and relationship: other. All additional source
-  #   relationships must be background or other.
-  # - Otherwise, omit type: original-proof and give at least one source a
-  #   formalizes, adapts, or independently-proves relationship. A new proof of
-  #   a known published result is source-based and uses independently-proves.
-  # Type, authors, contributors, id, location, note, license, and
-  # author_endorsement are optional; remove them when genuinely inapplicable.
-  # Authors are bibliographic authors. Contributors record other source roles,
-  # with one name and free-form role such as editor or problem-proposer.
-  # Type is a concise free-text
-  # description such as article, paper, book, formalization, web post, folklore,
-  # conversation, or other. The exact value original-proof is reserved for the
-  # result-origin declaration described above.
-  # Original-result example:
-  # - title: "TEMPLATE: describe the result first presented here"
-  #   type: original-proof
-  #   relationship: other
   - title: "On the Computational Complexity of the Vertex Cover Problem on Cubic Bridgeless Graphs"
     authors:
       - Kunal Relia
@@ -83,26 +47,22 @@ sources:
 
 status:
   scope: >-
-    Lemma 6 of the paper is formalized.
-  # Count the proof development, excluding Challenge.lean's deliberate sorry.
-  # Replace each count with an unquoted nonnegative integer, for example 0.
+    Theorem 8 of the paper is formalized.
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: []
-  # status.main_results is optional. Add it only when a short curated
-  # project-level list is useful; it need not mirror Comparator declarations.
 
 automation:
   methods:
     - method: "agent + manual"
-      models: ["Claude Sonnet 4.6 and 5"]
+      models: ["Claude Sonnet 4.6 / 5 / 5.5"]
       framework: "claude.ai (web browser)"
       tool_setup: "AI-assisted"
       cost:
         wall_time: "free tier / N/A"
         spend_usd: "free tier"
         hardware: "local machine"
-      prompting_notes: "We provided the completed PDF of the paper and asked for a line-by-line formalization. We heavily reiterated and edited the Lean code to ensure it matches the informal proof."
+      prompting_notes: "We provided the completed PDF of the paper and asked for a line-by-line formalization. We heavily reiterated and edited the Lean code to ensure it matches the paper's proof."
   spend_usd: "0"
   notes: "Code generated and iterated by AI using human-generated results from a paper."
 
@@ -117,7 +77,7 @@ alignment:
   namespace: ""
   statements:
     - source: "Paper at https://kunalrelia.github.io/img/VCCBG.pdf."
-      lean: "VCCBGPartII.lemma6_wrapper"
+      lean: "VCCBGPartII.Theorem8_wrapper"
       module: "challenge.lean (statement), solution.lean (proof)"
       status: "proved"
       note: ""

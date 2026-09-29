@@ -1,7 +1,7 @@
 {
   "challenge_module": "challenge",
   "solution_module": "solution",
-  "theorem_names": ["VCCBGPartII.Lemma6_wrapper"],
+  "theorem_names": ["VCCBGPartII.Theorem8_wrapper"],
   "definition_names": [],
   "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
   "enable_nanoda": true

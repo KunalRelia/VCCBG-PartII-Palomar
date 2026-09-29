@@ -1,5 +1,5 @@
 name = "VCCBG_PartII"
-version = "0.4.1"
+version = "1.0.0"
 keywords = ["math"]
 defaultTargets = ["VCCBGPartII","challenge","solution"]
 
