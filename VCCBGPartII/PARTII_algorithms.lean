@@ -494,7 +494,7 @@ public partial abbrev diminishingHopPhase (R0 : RTable G) : Finset V :=
     match n with
     | 0      => (R, S)
     | n + 1  => let (R', S') := diminishingHops R S; repeatHops n R' S'
-  let (_, Sfinal) := repeatHops (m / 2) R3 S3
+  let (_, Sfinal) := repeatHops (m) R3 S3
   Sfinal                                                                 -- Line 9
 
 -- ═══════════════════════════════════════════════════════════════════════════
